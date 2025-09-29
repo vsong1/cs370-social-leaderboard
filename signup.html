@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Squad Score</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-greeting">
+                <span>Welcome to Squad Score!</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="#" class="nav-link">Leaderboards</a>
+                <a href="#" class="nav-link">My Squads</a>
+                <a href="#" class="nav-link active">My Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="login-main-content">
+        <div class="login-container">
+            <h1 class="login-title">Sign Up</h1>
+            
+            <div class="login-form-container">
+                <form class="login-form">
+                    <div class="form-group">
+                        <label for="username" class="form-label">User Name:</label>
+                        <input type="text" id="username" name="username" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="emailAddress" class="form-label">Email Address:</label>
+                        <input type="text" id="emailAddress" name="emailAddress" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password:</label>
+                        <input type="password" id="password" name="password" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">Confirm Password:</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" required>
+                    </div>
+                    
+                    <button type="submit" class="signup-button">
+                        Register Now >
+                    </button>
+                    
+                    <div class="or-separator">OR</div>
+                    
+                    <button type="button" class="login-button" onclick="window.location.href='login.html'">
+                        Back to Sign In >
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        // Signup form functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const signupForm = document.querySelector('.login-form');
+            const signupButton = document.querySelector('.signup-button');
+            const loginButton = document.querySelector('.login-button');
+            
+            // Signup form submission
+            signupForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const emailAddress = document.getElementById('emailAddress').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match. Please re-enter.');
+                    return;
+                }
+
+                if (username && emailAddress && password && confirmPassword) {
+                    // Add click animation
+                    signupButton.style.transform = 'scale(0.95)';
+                    
+                    setTimeout(() => {
+                        signupButton.style.transform = '';
+                        // Future: Handle actual signup logic
+                        alert('Registration functionality coming soon!');
+                    }, 150);
+                }
+            });
+            
+            // Add hover effects
+            signupButton.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 0 20px rgba(167, 242, 182, 0.4)';
+            });
+            
+            signupButton.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            });
+            
+            loginButton.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 0 20px rgba(251, 139, 36, 0.4)';
+            });
+            
+            loginButton.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            });
+        });
+        
+      
+    </script>
+</body>
+</html>

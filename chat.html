@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Squads Chat - Squad Score</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-greeting">
+                <span>Hi Georgia!</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="#" class="nav-link">Leaderboards</a>
+                <a href="#" class="nav-link active">My Squads</a>
+                <a href="login.html" class="nav-link">My Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="chat-main-content">
+        <aside class="chat-sidebar">
+            <div class="chat-sidebar-header">
+                <h2 class="chat-sidebar-title">Your Squads</h2>
+                <span class="chat-badge">3 Active</span>
+            </div>
+
+            <div class="chat-search">
+                <input type="search" placeholder="Search squads or players…" aria-label="Search squads">
+            </div>
+
+            <div class="chat-squad-list" role="tablist" aria-label="Squad conversations">
+                <button class="chat-squad-card active" role="tab" data-squad="Valorant Legends" aria-selected="true">
+                    <div class="chat-squad-info">
+                        <span class="chat-squad-name">Valorant Legends</span>
+                        <span class="chat-squad-meta">5 members · Active now</span>
+                    </div>
+                    <span class="chat-badge">Ranked</span>
+                </button>
+
+                <button class="chat-squad-card" role="tab" data-squad="Net Ninjas" aria-selected="false">
+                    <div class="chat-squad-info">
+                        <span class="chat-squad-name">Net Ninjas</span>
+                        <span class="chat-squad-meta">4 members · 8 unread</span>
+                    </div>
+                    <span class="chat-badge">Tournament</span>
+                </button>
+
+                <button class="chat-squad-card" role="tab" data-squad="CSGO Allstars" aria-selected="false">
+                    <div class="chat-squad-info">
+                        <span class="chat-squad-name">CSGO Allstars</span>
+                        <span class="chat-squad-meta">8 members · Last match 2h ago</span>
+                    </div>
+                    <span class="chat-badge">Scrim</span>
+                </button>
+            </div>
+        </aside>
+
+        <section class="chat-window" aria-live="polite">
+            <header class="chat-header">
+                <div class="chat-header-info">
+                    <h1 class="chat-header-title">Valorant Legends</h1>
+                    <span class="chat-header-status">5 players online · Strategy session</span>
+                </div>
+                <div class="chat-header-actions">
+                    <button class="chat-action-button" type="button">View Squad</button>
+                    <button class="chat-action-button" type="button">Add Member</button>
+                </div>
+            </header>
+
+            <div class="chat-message-list" id="chat-message-list">
+                <div class="chat-day-separator">Today</div>
+
+                <article class="chat-message" data-author="Kai">
+                    <div class="chat-message-header">
+                        <span>Kai</span>
+                        <time datetime="2024-03-18T18:24">18:24</time>
+                    </div>
+                    <p class="chat-message-body">Great scrim tonight! Uploading the VOD now so we can review the mid-round calls.</p>
+                </article>
+
+                <article class="chat-message outgoing" data-author="You">
+                    <div class="chat-message-header">
+                        <span>You</span>
+                        <time datetime="2024-03-18T18:27">18:27</time>
+                    </div>
+                    <p class="chat-message-body">Awesome—let’s bookmark the eco round at 6:35. We need a cleaner rotate there.</p>
+                </article>
+
+                <article class="chat-message" data-author="Mira">
+                    <div class="chat-message-header">
+                        <span>Mira</span>
+                        <time datetime="2024-03-18T18:31">18:31</time>
+                    </div>
+                    <p class="chat-message-body">Agree. Also swapping Sage wall placement on B would stop the quick push. I’ll mock a setup.</p>
+                </article>
+            </div>
+
+            <form class="chat-composer" id="chat-composer" autocomplete="off">
+                <label for="chat-message" class="sr-only">Type your message</label>
+                <textarea id="chat-message" name="message" placeholder="Type a message…" required></textarea>
+                <button class="chat-send-button" type="submit">Send</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const squadCards = document.querySelectorAll('.chat-squad-card');
+            const messageList = document.getElementById('chat-message-list');
+            const composerForm = document.getElementById('chat-composer');
+            const messageField = document.getElementById('chat-message');
+
+            squadCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    squadCards.forEach(c => {
+                        c.classList.remove('active');
+                        c.setAttribute('aria-selected', 'false');
+                    });
+                    card.classList.add('active');
+                    card.setAttribute('aria-selected', 'true');
+                    // Placeholder for future squad switching logic
+                });
+            });
+
+            composerForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const message = messageField.value.trim();
+
+                if (!message) {
+                    return;
+                }
+
+                const messageArticle = document.createElement('article');
+                messageArticle.className = 'chat-message outgoing';
+                messageArticle.dataset.author = 'You';
+
+                const header = document.createElement('div');
+                header.className = 'chat-message-header';
+
+                const author = document.createElement('span');
+                author.textContent = 'You';
+
+                const timestamp = document.createElement('time');
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                timestamp.dateTime = now.toISOString();
+                timestamp.textContent = `${hours}:${minutes}`;
+
+                header.append(author, timestamp);
+
+                const body = document.createElement('p');
+                body.className = 'chat-message-body';
+                body.textContent = message;
+
+                messageArticle.append(header, body);
+                messageList.appendChild(messageArticle);
+                messageList.scrollTop = messageList.scrollHeight;
+
+                composerForm.reset();
+                messageField.focus();
+            });
+        });
+    </script>
+</body>
+</html>
