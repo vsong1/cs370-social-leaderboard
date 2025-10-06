@@ -64,39 +64,61 @@
         </div>
     </main>
 
+    <!-- Auth0 SDK -->
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+    
+    <!-- Auth0 Configuration -->
+    <script src="auth-config.js"></script>
+    
+    <!-- Auth0 Authentication Module -->
+    <script type="module" src="auth.js"></script>
+    
+    <!-- Upstream site scripts -->
     <script src="js/script.js"></script>
     <script>
-        // Signup form functionality
+        // Signup form functionality with Auth0
         document.addEventListener('DOMContentLoaded', function() {
             const signupForm = document.querySelector('.login-form');
             const signupButton = document.querySelector('.signup-button');
             const loginButton = document.querySelector('.login-button');
             
-            // Signup form submission
-            signupForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const username = document.getElementById('username').value;
-                const emailAddress = document.getElementById('emailAddress').value;
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-
-                if (password !== confirmPassword) {
-                    alert('Passwords do not match. Please re-enter.');
-                    return;
-                }
-
-                if (username && emailAddress && password && confirmPassword) {
-                    // Add click animation
-                    signupButton.style.transform = 'scale(0.95)';
+            // Wait for Auth0 to initialize
+            setTimeout(() => {
+                if (window.authService) {
+                    // Check if user is already authenticated
+                    if (window.authService.getIsAuthenticated()) {
+                        // Redirect to home page if already logged in
+                        window.location.href = 'index.html';
+                        return;
+                    }
                     
-                    setTimeout(() => {
-                        signupButton.style.transform = '';
-                        // Future: Handle actual signup logic
-                        alert('Registration functionality coming soon!');
-                    }, 150);
+                    // Set up Auth0 signup button
+                    signupButton.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        // Add click animation
+                        signupButton.style.transform = 'scale(0.95)';
+                        
+                        setTimeout(() => {
+                            signupButton.style.transform = '';
+                            window.authService.signup();
+                        }, 150);
+                    });
+                    
+                    // Set up back to login button
+                    loginButton.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        // Add click animation
+                        loginButton.style.transform = 'scale(0.95)';
+                        
+                        setTimeout(() => {
+                            loginButton.style.transform = '';
+                            window.location.href = 'login.html';
+                        }, 150);
+                    });
                 }
-            });
+            }, 1000);
             
             // Add hover effects
             signupButton.addEventListener('mouseenter', function() {
@@ -120,7 +142,6 @@
             });
         });
         
-      
     </script>
 </body>
 </html>
