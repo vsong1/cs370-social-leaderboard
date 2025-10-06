@@ -34,8 +34,8 @@ function handleNavigation(page) {
             window.location.href = 'index.html';
             break;
         case 'Leaderboards':
-            // Future: Navigate to leaderboards page
-            alert('Leaderboards page coming soon!');
+            // Navigate to leaderboards page
+            window.location.href = 'leaderboard.html';
             break;
         case 'My Squads':
             // Navigate to chat page for squads
@@ -54,13 +54,29 @@ function viewLeaderboards() {
     
     // Add click animation
     const button = document.querySelector('.cta-button');
-    button.style.transform = 'scale(0.95)';
-    
-    setTimeout(() => {
-        button.style.transform = '';
-        // Future: Navigate to leaderboards or show modal
-        alert('Leaderboards feature coming soon! 🏆');
-    }, 150);
+    if (button) {
+        button.style.transform = 'scale(0.95)';
+        
+        setTimeout(() => {
+            button.style.transform = '';
+            // Navigate to leaderboards page
+            window.location.href = 'leaderboard.html';
+        }, 150);
+    }
+}
+
+// Leaderboard page functionality
+function goBackToLeaderboards() {
+    console.log('Back to Leaderboards clicked');
+    // For now, just go back to home page
+    // In a real app, this might go to a main leaderboards listing
+    window.location.href = 'index.html';
+}
+
+function openSquadChat() {
+    console.log('Open Squad Chat clicked');
+    // Navigate to chat page
+    window.location.href = 'chat.html';
 }
 
 // Add some interactive effects
