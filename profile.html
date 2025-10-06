@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Squad Score</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-greeting">
+                <span>Ready to compete, Georgia!</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="leaderboard.html" class="nav-link">Leaderboards</a>
+                <a href="chat.html" class="nav-link">My Squads</a>
+                <a href="profile.html" class="nav-link active">Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="profile-main">
+        <section class="profile-container" data-animate-on-scroll>
+            <header class="profile-header">
+                <div class="profile-avatar" aria-label="Georgia Walsh avatar">
+                    <span>GW</span>
+                </div>
+                <div class="profile-summary">
+                    <h1 class="profile-name" data-profile-field="fullName">Georgia Walsh</h1>
+                    <p class="profile-tagline" data-profile-field="tagline">Joined Since: March 2024</p>
+                    <button class="profile-edit-button" type="button" data-profile-action="edit">Edit Profile</button>
+                </div>
+            </header>
+
+            <form class="profile-grid" id="profile-form" novalidate>
+                <section class="profile-card" aria-labelledby="personal-details-title">
+                    <div class="profile-card-header">
+                        <h2 class="profile-card-title" id="personal-details-title">Personal Details</h2>
+                    </div>
+                    <div class="profile-card-body">
+                        <div class="profile-field" data-profile-field-container>
+                            <label class="profile-field-label" for="profile-first-name">First Name</label>
+                            <span class="profile-field-value" data-profile-display>Georgia</span>
+                            <input class="profile-field-input" id="profile-first-name" name="firstName" value="Georgia" autocomplete="given-name" required>
+                        </div>
+                        <div class="profile-field" data-profile-field-container>
+                            <label class="profile-field-label" for="profile-last-name">Last Name</label>
+                            <span class="profile-field-value" data-profile-display>Walsh</span>
+                            <input class="profile-field-input" id="profile-last-name" name="lastName" value="Walsh" autocomplete="family-name" required>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="profile-card" aria-labelledby="login-details-title">
+                    <div class="profile-card-header">
+                        <h2 class="profile-card-title" id="login-details-title">Login Details</h2>
+                        <span class="profile-card-note">Only visible to you</span>
+                    </div>
+                    <div class="profile-card-body">
+                        <div class="profile-field" data-profile-field-container>
+                            <label class="profile-field-label" for="profile-username">Username</label>
+                            <span class="profile-field-value" data-profile-display>gwFirepit</span>
+                            <input class="profile-field-input" id="profile-username" name="username" value="gwFirepit" autocomplete="username" required>
+                        </div>
+                        <div class="profile-field" data-profile-field-container>
+                            <label class="profile-field-label" for="profile-email">Email</label>
+                            <span class="profile-field-value" data-profile-display>georgia.walsh@example.com</span>
+                            <input class="profile-field-input" id="profile-email" name="email" value="georgia.walsh@example.com" type="email" autocomplete="email" required>
+                        </div>
+                        <div class="profile-field" data-profile-field-container>
+                            <label class="profile-field-label" for="profile-password">Password</label>
+                            <span class="profile-field-value" data-profile-display>12345678</span>
+                            <input class="profile-field-input" id="profile-password" name="password" value="12345678" type="text" autocomplete="current-password" required>
+
+                        </div>
+                    </div>
+                </section>
+            </form>
+
+            <div class="profile-actions" data-profile-actions>
+                <button class="profile-action-button profile-action-cancel" type="button" data-profile-action="cancel">Cancel</button>
+                <button class="profile-action-button profile-action-submit" type="submit" form="profile-form" data-profile-action="submit">Save Changes</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

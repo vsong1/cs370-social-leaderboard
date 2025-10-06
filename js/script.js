@@ -41,9 +41,8 @@ function handleNavigation(page) {
             // Navigate to chat page for squads
             window.location.href = 'chat.html';
             break;
-        case 'My Profile':
-            // Navigate to login page
-            window.location.href = 'login.html';
+        case 'Profile':
+            window.location.href = 'profile.html';
             break;
     }
 }
@@ -128,7 +127,7 @@ document.addEventListener('keydown', function(e) {
     
     // Handle Escape key to reset navigation
     if (e.key === 'Escape') {
-        const homeLink = document.querySelector('.nav-link[href="#"]');
+        const homeLink = document.querySelector('.nav-link[href="index.html"]');
         if (homeLink && !homeLink.classList.contains('active')) {
             homeLink.click();
         }
@@ -157,3 +156,133 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(el);
     });
 });
+
+// Profile edit functionality
+// Profile edit functionality
+(function initProfileEditor() {
+    const container = document.querySelector('.profile-container');
+    if (!container) {
+        return;
+    }
+
+    const editButton = container.querySelector('[data-profile-action="edit"]');
+    const actionsBar = container.querySelector('[data-profile-actions]');
+    const form = container.querySelector('#profile-form');
+    const displayName = container.querySelector('[data-profile-field="fullName"]');
+    const displayTagline = container.querySelector('[data-profile-field="tagline"]');
+    const fieldContainers = Array.from(container.querySelectorAll('[data-profile-field-container]'));
+    const greeting = document.querySelector('.nav-greeting span');
+
+    const originalValues = new Map();
+    const PASSWORD_MASK = '??????????';
+
+    const setEditingState = (isEditing) => {
+        container.classList.toggle('is-editing', isEditing);
+        if (actionsBar) {
+            actionsBar.hidden = !isEditing;
+        }
+
+        if (isEditing) {
+            fieldContainers.forEach(container => {
+                const input = container.querySelector('.profile-field-input');
+                const display = container.querySelector('[data-profile-display]');
+                if (!input) {
+                    return;
+                }
+                originalValues.set(input.name, input.value);
+                if (display && input.id !== 'profile-password') {
+                    input.value = display.textContent.trim();
+                }
+            });
+            const firstInput = form ? form.querySelector('.profile-field-input') : null;
+            if (firstInput) {
+                firstInput.focus();
+                firstInput.select();
+            }
+        } else {
+            fieldContainers.forEach(container => {
+                const input = container.querySelector('.profile-field-input');
+                if (!input) {
+                    return;
+                }
+                if (originalValues.has(input.name)) {
+                    input.value = originalValues.get(input.name);
+                }
+            });
+            originalValues.clear();
+        }
+    };
+
+    const refreshDisplays = () => {
+        fieldContainers.forEach(container => {
+            const input = container.querySelector('.profile-field-input');
+            const display = container.querySelector('[data-profile-display]');
+            if (!input || !display) {
+                return;
+            }
+
+            const value = input.value.trim();
+            if (input.id === 'profile-password') {
+                display.textContent = value ? PASSWORD_MASK : '--';
+            } else {
+                display.textContent = value || '--';
+            }
+        });
+
+        const firstInput = form ? form.querySelector('#profile-first-name') : null;
+        const lastInput = form ? form.querySelector('#profile-last-name') : null;
+        const firstValue = firstInput ? firstInput.value.trim() : '';
+        const lastValue = lastInput ? lastInput.value.trim() : '';
+
+        if (displayName) {
+            const fullName = [firstValue, lastValue].filter(Boolean).join(' ').trim();
+            displayName.textContent = fullName || 'Unnamed Player';
+        }
+
+        if (greeting) {
+            greeting.textContent = firstValue ? `Ready to compete, ${firstValue}!` : 'Ready to compete!';
+        }
+
+        if (displayTagline) {
+            const squad = 'Firepit Friends';
+            displayTagline.textContent = `Captain - ${squad} - Joined March 2024`;
+        }
+    };
+
+    if (actionsBar) {
+        actionsBar.hidden = true;
+    }
+
+    if (editButton) {
+        editButton.addEventListener('click', () => {
+            refreshDisplays();
+            setEditingState(true);
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            refreshDisplays();
+            fieldContainers.forEach(container => {
+                const input = container.querySelector('.profile-field-input');
+                if (!input) {
+                    return;
+                }
+                originalValues.set(input.name, input.value);
+            });
+            setEditingState(false);
+        });
+    }
+
+    const cancelButton = container.querySelector('[data-profile-action="cancel"]');
+    if (cancelButton) {
+        cancelButton.addEventListener('click', () => {
+            setEditingState(false);
+            refreshDisplays();
+        });
+    }
+
+    refreshDisplays();
+})();
+
