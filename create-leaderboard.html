@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Leaderboard - Squad Score</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/create-leaderboard.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-greeting">
+                <span>Hi, Georgia!</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="all-leaderboards.html" class="nav-link active">Leaderboards</a>
+                <a href="chat.html" class="nav-link">My Squads</a>
+                <a href="profile.html" class="nav-link">My Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="create-leaderboard-main">
+        <div class="create-leaderboard-container">
+            <div class="create-leaderboard-header">
+                <h1 class="create-leaderboard-title">Top Squad > New Leaderboard</h1>
+            </div>
+
+            <form class="create-leaderboard-form" id="create-leaderboard-form">
+                <div class="form-section">
+                    <div class="form-field">
+                        <label for="leaderboard-name">Leaderboard Name</label>
+                        <input type="text" id="leaderboard-name" name="leaderboard_name" required placeholder="Enter leaderboard name">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="leaderboard-icon">Icon</label>
+                        <div class="icon-selection">
+                            <div class="icon-option" data-icon="brain">
+                                <div class="icon-circle brain-icon">
+                                    <span class="icon-symbol">🧠</span>
+                                </div>
+                            </div>
+                            <div class="icon-option" data-icon="soccer">
+                                <div class="icon-circle soccer-icon">
+                                    <span class="icon-symbol">⚽</span>
+                                </div>
+                            </div>
+                            <div class="icon-option" data-icon="add">
+                                <div class="icon-circle add-icon">
+                                    <span class="icon-symbol">+</span>
+                                    <span class="add-text">add icon</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="game-selection">Game</label>
+                        <select id="game-selection" name="game_selection">
+                            <option value="">select option or enter custom game</option>
+                            <option value="valorant">Valorant</option>
+                            <option value="csgo">CS:GO</option>
+                            <option value="lol">League of Legends</option>
+                            <option value="dota2">Dota 2</option>
+                            <option value="overwatch">Overwatch</option>
+                            <option value="custom">Custom Game</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-section two-columns">
+                    <div class="form-column">
+                        <h3 class="section-title">Add some squad members (you can add others later):</h3>
+                        <div class="squad-members-list">
+                            <div class="member-item">Player123</div>
+                            <div class="member-item">Georgia</div>
+                            <div class="member-item">Kevin</div>
+                            <div class="member-item">De</div>
+                            <div class="member-item">Fred</div>
+                        </div>
+                    </div>
+
+                    <div class="form-column">
+                        <h3 class="section-title">Additional Settings</h3>
+                        <div class="settings-list">
+                            <label class="setting-item">
+                                <input type="checkbox" name="allow_join_without_invite">
+                                <span class="checkmark"></span>
+                                allow squad members to join without invitation
+                            </label>
+                            <label class="setting-item">
+                                <input type="checkbox" name="require_admin_approval">
+                                <span class="checkmark"></span>
+                                require admin approval for new submissions
+                            </label>
+                            <label class="setting-item">
+                                <input type="checkbox" name="require_evidence">
+                                <span class="checkmark"></span>
+                                require "evidence" for new submissions
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="create-button">CREATE</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Auth0 SDK -->
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+    
+    <!-- Auth0 Configuration -->
+    <script src="auth-config.js"></script>
+    
+    <!-- Auth0 Authentication Module -->
+    <script type="module" src="auth.js"></script>
+    
+    <!-- Upstream site scripts -->
+    <script src="js/script.js"></script>
+    <script src="js/create-leaderboard.js"></script>
+</body>
+</html>
