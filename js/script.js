@@ -34,8 +34,8 @@ function handleNavigation(page) {
             window.location.href = 'index.html';
             break;
         case 'Leaderboards':
-            // Navigate to leaderboards page
-            window.location.href = 'leaderboard.html';
+            // Navigate to all leaderboards page
+            window.location.href = 'all-leaderboards.html';
             break;
         case 'My Squads':
             // Navigate to squad chat hub
@@ -58,8 +58,8 @@ function viewLeaderboards() {
         
         setTimeout(() => {
             button.style.transform = '';
-            // Navigate to leaderboards page
-            window.location.href = 'leaderboard.html';
+            // Navigate to all leaderboards page
+            window.location.href = 'all-leaderboards.html';
         }, 150);
     }
 }
