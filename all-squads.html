@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/all-squads.css">
+
 </head>
 <body>
     <nav class="navbar">
@@ -16,35 +18,16 @@
                 <span>Welcome to Squad Score!</span>
             </div>
             <div class="nav-links">
-                <a href="index.html" class="nav-link active">Home</a>
+                <a href="index.html" class="nav-link">Home</a>
                 <a href="all-leaderboards.html" class="nav-link">Leaderboards</a>
-                <a href="all-squads.html" class="nav-link">My Squads</a>
+                <a href="all-squads.html" class="nav-link active">My Squads</a>
                 <a href="profile.html" class="nav-link">Profile</a>
             </div>
         </div>
     </nav>
 
-    <main class="main-content">
-        <div class="welcome-section">
-            <h1 class="welcome-title">
-                <span class="welcome-text">Welcome to</span>
-                <span class="squad-text">Squad</span>
-                <span class="score-text">Score</span>
-            </h1>
-            <button class="cta-button" onclick="viewLeaderboards()">
-                VIEW LEADERBOARDS &gt;
-            </button>
-        </div>
+    <main class="squadlist-content">
     </main>
-
-    <!-- Auth0 SDK -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
-    
-    <!-- Auth0 Configuration -->
-    <script src="auth-config.js"></script>
-    
-    <!-- Auth0 Authentication Module -->
-    <script type="module" src="auth.js"></script>
     
     <!-- Upstream site scripts -->
     <script src="js/script.js"></script>
