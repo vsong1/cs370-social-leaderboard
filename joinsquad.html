@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Squad - Squad Score</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/all-squads.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-greeting">
+                <span>Welcome to Squad Score!</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="all-leaderboards.html" class="nav-link">Leaderboards</a>
+                <a href="chat.html" class="nav-link">My Squads</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="squadlist-content">
+        <section class="squad-header">
+            <div>
+                <h1 class="squad-title">Join Squad</h1>
+                <p class="squad-subtitle">Enter an invitation code to join an existing squad.</p>
+            </div>
+        </section>
+
+        <section class="create-squad-panel join-squad-panel">
+            <form id="join-squad-form" novalidate>
+                <h2 class="panel-title">Have an invite?</h2>
+                <p class="panel-subtitle">Paste the code your squad captain shared with you.</p>
+                <div class="form-field">
+                    <label for="join-code">Invitation Code<span aria-hidden="true">*</span></label>
+                    <input id="join-code" name="invite_code" required maxlength="24" autocomplete="off" placeholder="e.g., VAL-LEGENDS-23">
+                </div>
+                <p class="form-error" role="alert" data-join-error hidden></p>
+                <p class="form-success" role="status" data-join-feedback hidden></p>
+                <div class="form-actions join-actions">
+                    <button type="submit" class="form-submit">Join Squad</button>
+                </div>
+            </form>
+        </section>
+
+    </main>
+
+    <!-- Upstream site scripts -->
+    <script src="js/script.js"></script>
+    <script type="module" src="js/squads.js"></script>
+</body>
+</html>

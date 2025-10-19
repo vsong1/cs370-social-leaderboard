@@ -1,0 +1,23 @@
+# Node dependencies
+node_modules/
+
+# Environment files
+.env
+
+# Build output
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Architecture docs (local only)
+PROJECT_OVERVIEW.md
+CREATE_SQUAD_PLAN.md
+"node_modules/" 
