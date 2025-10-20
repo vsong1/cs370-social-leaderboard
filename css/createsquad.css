@@ -8,6 +8,11 @@
     gap: 2rem;
 }
 
+.join-alone {
+    min-height: 100vh;
+    justify-content: center;
+}
+
 .squad-header {
     display: flex;
     justify-content: space-between;
@@ -55,7 +60,15 @@
 
 .join-squad-panel {
     display: grid;
-    gap: 1rem;
+    gap: 1.5rem;
+}
+
+.join-squad-panel .panel-title {
+    margin-bottom: 0.35rem;
+}
+
+.join-squad-panel .panel-subtitle {
+    margin-bottom: 0.9rem;
 }
 
 .panel-title {

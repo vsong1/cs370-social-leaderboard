@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/all-squads.css">
+    <link rel="stylesheet" href="css/createsquad.css">
 </head>
 <body>
     <nav class="navbar">
@@ -25,18 +25,16 @@
         </div>
     </nav>
 
-    <main class="squadlist-content">
+    <main class="squadlist-content join-alone">
         <section class="squad-header">
             <div>
                 <h1 class="squad-title">Join Squad</h1>
-                <p class="squad-subtitle">Enter an invitation code to join an existing squad.</p>
             </div>
         </section>
 
         <section class="create-squad-panel join-squad-panel">
             <form id="join-squad-form" novalidate>
                 <h2 class="panel-title">Have an invite?</h2>
-                <p class="panel-subtitle">Paste the code your squad captain shared with you.</p>
                 <div class="form-field">
                     <label for="join-code">Invitation Code<span aria-hidden="true">*</span></label>
                     <input id="join-code" name="invite_code" required maxlength="24" autocomplete="off" placeholder="e.g., VAL-LEGENDS-23">
