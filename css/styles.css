@@ -2,7 +2,7 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box; 
 }
 
 body {
@@ -30,10 +30,7 @@ body {
     background-color: #172A3A;
     border-bottom: 1px solid #2D3748;
     padding: 1rem 0;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    position: relative;
     z-index: 1000;
 }
 
@@ -53,12 +50,12 @@ body {
     color: #F5F1ED;
 }
 
-.nav-links {
+/* .nav-links {
     display: flex;
     gap: 2rem;
     align-items: center;
     width: max-content;
-}
+} */
 
 .nav-link {
     color: #F5F1ED;
@@ -94,7 +91,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding-top: 80px; /* Account for fixed navbar */
+    /* padding-top: 80px; Account for fixed navbar */
 }
 
 .welcome-section {
@@ -211,6 +208,10 @@ body {
         justify-content: center;
     }
     
+    .navbar {
+        padding: 1rem 0 0;
+    }
+
     .nav-link {
         font-size: 0.85rem;
     }

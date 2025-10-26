@@ -1,0 +1,71 @@
+/* Hamburger Button — Hidden on larger screens */
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 30px;
+    height: 25px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1100;
+}
+
+.hamburger .bar {
+    height: 3px;
+    width: 100%;
+    background-color: #F5F1ED;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+/* Hide nav-links by default on phones */
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    background-color: #172A3A;
+}
+
+/* Show when menu is active */
+.nav-links.active {
+    max-height: 30rem;
+    opacity: 1;
+    padding: 1rem 0;
+}
+
+/* Animate hamburger into "X" */
+.hamburger.active .bar:nth-child(1) {
+    transform: rotate(45deg) translateX(5px) translateY(6px);
+}
+
+.hamburger.active .bar:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active .bar:nth-child(3) {
+    transform: rotate(-45deg) translateX(5px) translateY(-6px);
+}
+
+@media screen and (min-width: 768px) {
+    .hamburger {
+        display: none;
+    }
+
+    .nav-links {
+        max-height: none;
+        opacity: 1;
+        align-items: center;
+        flex-direction: row;
+        border: none;
+        padding: 0;
+    }
+
+    .nav-link {
+        margin: 0 1rem;
+    }
+}

@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/burger-menu.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -15,6 +16,14 @@
             <div class="nav-greeting">
                 <span>Ready to compete, Georgia!</span>
             </div>
+
+            <!-- Hamburger button -->
+            <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+
             <div class="nav-links">
                 <a href="index.html" class="nav-link">Home</a>
                 <a href="all-leaderboards.html" class="nav-link">Leaderboards</a>
@@ -89,6 +98,11 @@
         </section>
     </main>
 
+    <!-- Upstream site scripts -->
     <script src="js/script.js"></script>
+    
+    <!-- Hamburger menu for navbar -->
+    <script src="js/burger-menu.js"></script>
+
 </body>
 </html>
