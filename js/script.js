@@ -333,6 +333,15 @@ function initializeLeaderboardSearch() {
             this.blur();
         }
     });
+    // Mobile-friendly: Add touch events for better mobile experience
+    searchInput.addEventListener('touchstart', function() {
+        this.focus();
+    });
+    
+    // Prevent zoom on double-tap for mobile
+    searchInput.addEventListener('touchend', function(e) {
+        e.preventDefault();
+    });
 }
 
 function clearLeaderboardSearch() {
