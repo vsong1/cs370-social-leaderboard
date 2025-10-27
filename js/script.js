@@ -285,3 +285,71 @@ document.addEventListener('DOMContentLoaded', function() {
     refreshDisplays();
 })();
 
+// Search functionality for leaderboard
+function initializeSearch() {
+    const searchInput = document.getElementById('player-search');
+    const leaderboardList = document.getElementById('leaderboard-list');
+    
+    if (!searchInput || !leaderboardList) {
+        console.log('Search elements not found');
+        return;
+    }
+    
+    // Add event listener for search input
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        const entries = leaderboardList.querySelectorAll('.leaderboard-entry');
+        
+        entries.forEach(entry => {
+            const playerName = entry.querySelector('.player-name').textContent.toLowerCase();
+            
+            if (searchTerm === '') {
+                // Show all entries
+                entry.classList.remove('hidden', 'highlighted');
+            } else if (playerName.includes(searchTerm)) {
+                // Show and highlight matching entries
+                entry.classList.remove('hidden');
+                entry.classList.add('highlighted');
+            } else {
+                // Hide non-matching entries
+                entry.classList.add('hidden');
+                entry.classList.remove('highlighted');
+            }
+        });
+        
+        // Update search button visibility
+        const searchButton = document.querySelector('.search-button');
+        if (searchButton) {
+            searchButton.style.display = searchTerm ? 'flex' : 'none';
+        }
+    });
+    
+    // Add keyboard shortcuts
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            this.dispatchEvent(new Event('input'));
+            this.blur();
+        }
+    });
+}
+
+function clearSearch() {
+    const searchInput = document.getElementById('player-search');
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.focus();
+    }
+}
+
+// Initialize search when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're on the leaderboard page
+    if (document.getElementById('player-search')) {
+        initializeSearch();
+    }
+});
+
+
+
