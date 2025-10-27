@@ -48,7 +48,17 @@
                 </div>
             </div>
 
-            <div class="leaderboard-list">
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" id="player-search" placeholder="Search players..." class="search-input">
+                    <button class="search-button" onclick="clearSearch()">
+                        <span class="search-icon">×</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="leaderboard-list" id="leaderboard-list">
                 <div class="leaderboard-entry rank-1">
                     <span class="rank">#1</span>
                     <span class="player-name">Player123</span>
