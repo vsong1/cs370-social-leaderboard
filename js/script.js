@@ -67,9 +67,8 @@ function viewLeaderboards() {
 // Leaderboard page functionality
 function goBackToLeaderboards() {
     console.log('Back to Leaderboards clicked');
-    // For now, just go back to home page
-    // In a real app, this might go to a main leaderboards listing
-    window.location.href = 'index.html';
+    // Navigate to all leaderboards page
+    window.location.href = 'all-leaderboards.html';
 }
 
 function openSquadChat() {
