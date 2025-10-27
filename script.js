@@ -1,5 +1,5 @@
 // Interactive functionality for Squad Score website
-
+console.log('Script.js loaded - handleCTAClick function available:', typeof handleCTAClick);
 // Navigation functionality
 document.addEventListener('DOMContentLoaded', function() {
     // Handle navigation link clicks
@@ -49,24 +49,30 @@ function handleNavigation(page) {
 
 // CTA Button functionality - authentication aware
 function handleCTAClick() {
-    console.log('CTA button clicked');
+    console.log('CTA button clicked - handleCTAClick function called');
     
     // Add click animation
     const button = document.querySelector('.cta-button');
-    button.style.transform = 'scale(0.95)';
-    
-    setTimeout(() => {
-        button.style.transform = '';
-                
-        // Check if user is authenticated
-        if (window.authService && window.authService.getIsAuthenticated()) {
-            // User is logged in - navigate to leaderboards
-            window.location.href = 'all-leaderboards.html';
-        } else {
-            // User is not logged in - navigate to login page
-            window.location.href = 'login.html';
-        }
-    }, 150);
+    if (button) {
+        button.style.transform = 'scale(0.95)';
+        
+        setTimeout(() => {
+            button.style.transform = '';
+            
+            // Check if user is authenticated
+            if (window.authService && window.authService.getIsAuthenticated()) {
+                // User is logged in - navigate to leaderboards
+                console.log('User is authenticated, navigating to leaderboards');
+                window.location.href = 'all-leaderboards.html';
+            } else {
+                // User is not logged in - navigate to login page
+                console.log('User is not authenticated, navigating to login');
+                window.location.href = 'login.html';
+            }
+        }, 150);
+    } else {
+        console.error('CTA button not found!');
+    }
 }
 // Update UI based on authentication status
 function updateUIForAuth() {
@@ -99,6 +105,8 @@ function updateUIForAuth() {
 
 // Add some interactive effects
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded - handleCTAClick function available:', typeof handleCTAClick);
+    console.log('CTA button element:', document.getElementById('cta-button'));
     // Update UI based on authentication status
     updateUIForAuth();
     
