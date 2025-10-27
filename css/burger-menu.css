@@ -1,4 +1,4 @@
-/* Hamburger Button — Hidden on larger screens */
+/* Hamburger Button - Hidden on larger screens */
 .hamburger {
     display: flex;
     flex-direction: column;
@@ -15,7 +15,7 @@
 .hamburger .bar {
     height: 3px;
     width: 100%;
-    background-color: #F5F1ED;
+    background-color: var(--text-primary);
     border-radius: 3px;
     transition: all 0.3s ease;
 }
@@ -28,7 +28,7 @@
     overflow: hidden;
     max-height: 0;
     opacity: 0;
-    background-color: #172A3A;
+    background-color: var(--nav-bg);
 }
 
 /* Show when menu is active */

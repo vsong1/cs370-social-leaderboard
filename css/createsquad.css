@@ -28,16 +28,16 @@
 }
 
 .squad-subtitle {
-    color: rgba(245, 241, 237, 0.75);
+    color: rgba(var(--text-primary-rgb), 0.75);
     font-size: 0.95rem;
 }
 
 .create-squad-toggle {
     padding: 0.85rem 1.6rem;
     border-radius: 999px;
-    border: 1px solid rgba(251, 139, 36, 0.8);
+    border: 1px solid rgba(var(--accent-orange-rgb), 0.8);
     background: transparent;
-    color: #FB8B24;
+    color: var(--accent-orange);
     font-family: 'Orbitron', monospace;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -47,15 +47,15 @@
 
 .create-squad-toggle:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(251, 139, 36, 0.25);
+    box-shadow: 0 12px 32px rgba(var(--accent-orange-rgb), 0.25);
 }
 
 .create-squad-panel {
     padding: 1.75rem;
     border-radius: 20px;
-    background: rgba(12, 29, 43, 0.82);
-    border: 1px solid rgba(167, 242, 182, 0.25);
-    box-shadow: 0 18px 40px rgba(12, 29, 43, 0.4);
+    background: var(--bg-panel);
+    border: 1px solid rgba(var(--accent-green-rgb), 0.25);
+    box-shadow: var(--shadow-md);
 }
 
 .join-squad-panel {
@@ -77,7 +77,7 @@
 }
 
 .panel-subtitle {
-    color: rgba(245, 241, 237, 0.7);
+    color: rgba(var(--text-primary-rgb), 0.7);
     font-size: 0.9rem;
 }
 
@@ -96,7 +96,7 @@
     font-size: 0.85rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(245, 241, 237, 0.6);
+    color: rgba(var(--text-primary-rgb), 0.6);
 }
 
 .form-field input,
@@ -104,9 +104,9 @@
 .form-field textarea {
     padding: 0.85rem 1rem;
     border-radius: 14px;
-    border: 1px solid rgba(54, 75, 94, 0.8);
-    background: rgba(17, 40, 56, 0.9);
-    color: #F5F1ED;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-input);
+    color: var(--text-primary);
     font-size: 1rem;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -115,8 +115,8 @@
 .form-field select:focus,
 .form-field textarea:focus {
     outline: none;
-    border-color: #A7F2B6;
-    box-shadow: 0 0 0 3px rgba(167, 242, 182, 0.25);
+    border-color: var(--accent-green);
+    box-shadow: var(--input-focus-ring);
 }
 
 .form-field textarea {
@@ -143,20 +143,20 @@
 }
 
 .form-cancel {
-    background: rgba(23, 42, 58, 0.9);
-    color: rgba(245, 241, 237, 0.85);
-    border: 1px solid rgba(54, 75, 94, 0.85);
+    background: var(--bg-elevated);
+    color: rgba(var(--text-primary-rgb), 0.85);
+    border: 1px solid var(--border-soft);
 }
 
 .form-submit {
-    background: linear-gradient(135deg, #A7F2B6, #68D391);
-    color: #0B1723;
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-green-strong));
+    color: var(--text-inverse);
 }
 
 .form-cancel:hover,
 .form-submit:hover {
     transform: translateY(-1px);
-    box-shadow: 0 16px 34px rgba(7, 18, 28, 0.3);
+    box-shadow: var(--shadow-md);
 }
 
 .form-cancel:disabled,
@@ -169,13 +169,13 @@
 
 .form-error {
     margin-top: -0.4rem;
-    color: #FF5BCE;
+    color: var(--accent-pink);
     font-size: 0.9rem;
 }
 
 .form-success {
     margin-top: -0.4rem;
-    color: #68D391;
+    color: var(--accent-green-strong);
     font-size: 0.9rem;
 }
 
@@ -194,9 +194,9 @@
     gap: 0.75rem;
     padding: 1.75rem;
     border-radius: 20px;
-    background: rgba(11, 25, 37, 0.9);
-    border: 1px solid rgba(88, 123, 151, 0.4);
-    box-shadow: 0 20px 42px rgba(7, 18, 28, 0.35);
+    background: var(--bg-overlay);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-lg);
 }
 
 .squad-card-header {
@@ -217,29 +217,29 @@
     font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    background: rgba(251, 139, 36, 0.18);
-    color: #FB8B24;
+    background: rgba(var(--accent-orange-rgb), 0.18);
+    color: var(--accent-orange);
 }
 
 .squad-card-meta {
     display: flex;
     gap: 1.5rem;
     flex-wrap: wrap;
-    color: rgba(245, 241, 237, 0.7);
+    color: rgba(var(--text-primary-rgb), 0.7);
     font-size: 0.9rem;
 }
 
 .squad-card-description {
-    color: rgba(245, 241, 237, 0.78);
+    color: rgba(var(--text-primary-rgb), 0.78);
 }
 
 .empty-state {
     padding: 2.5rem;
     border-radius: 20px;
     text-align: center;
-    border: 1px dashed rgba(167, 242, 182, 0.3);
-    background: rgba(11, 25, 37, 0.65);
-    color: rgba(245, 241, 237, 0.75);
+    border: 1px dashed rgba(var(--accent-green-rgb), 0.3);
+    background: var(--bg-card);
+    color: rgba(var(--text-primary-rgb), 0.75);
 }
 
 @media (max-width: 640px) {

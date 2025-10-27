@@ -10,11 +10,11 @@
 .create-leaderboard-container {
     max-width: 800px;
     width: 100%;
-    background: rgba(23, 42, 58, 0.9);
-    border: 1px solid #2D3748;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
     border-radius: 16px;
     padding: 2rem;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-lg);
 }
 
 .create-leaderboard-header {
@@ -25,7 +25,7 @@
     font-family: 'Orbitron', monospace;
     font-size: 1.8rem;
     font-weight: 700;
-    color: #F5F1ED;
+    color: var(--text-primary);
     margin: 0;
 }
 
@@ -57,7 +57,7 @@
 .form-field label {
     font-size: 1rem;
     font-weight: 500;
-    color: #F5F1ED;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
 }
@@ -65,10 +65,10 @@
 .form-field input,
 .form-field select {
     padding: 0.75rem 1rem;
-    border: 1px solid #F5F1ED;
+    border: 1px solid var(--glass-border);
     border-radius: 8px;
-    background: transparent;
-    color: #F5F1ED;
+    background: var(--bg-input);
+    color: var(--text-primary);
     font-size: 1rem;
     font-family: 'Inter', sans-serif;
     transition: all 0.3s ease;
@@ -77,12 +77,12 @@
 .form-field input:focus,
 .form-field select:focus {
     outline: none;
-    border-color: #A7F2B6;
-    box-shadow: 0 0 0 3px rgba(167, 242, 182, 0.3);
+    border-color: var(--accent-green);
+    box-shadow: var(--input-focus-ring);
 }
 
 .form-field input::placeholder {
-    color: rgba(245, 241, 237, 0.6);
+    color: rgba(var(--text-primary-rgb), 0.6);
 }
 
 /* Icon Selection */
@@ -119,11 +119,11 @@
 }
 
 .brain-icon {
-    background: linear-gradient(135deg, #FF5BCE, #FF8E9B);
+    background: linear-gradient(135deg, var(--accent-pink), var(--accent-pink-soft));
 }
 
 .soccer-icon {
-    background: linear-gradient(135deg, #68D391, #A7F2B6);
+    background: linear-gradient(135deg, var(--accent-green-strong), var(--accent-green));
 }
 
 .icon-symbol {
@@ -132,9 +132,9 @@
 }
 
 .add-icon {
-    background: #F5F1ED;
-    color: #172A3A;
-    border: 2px solid #F5F1ED;
+    background: var(--text-primary);
+    color: var(--text-inverse);
+    border: 2px solid var(--text-primary);
 }
 
 .add-icon .icon-symbol {
@@ -143,8 +143,8 @@
 }
 
 .icon-option.selected .icon-circle {
-    border-color: #A7F2B6;
-    box-shadow: 0 0 0 3px rgba(167, 242, 182, 0.3);
+    border-color: var(--accent-green);
+    box-shadow: var(--input-focus-ring);
 }
 
 /* Two Column Layout */
@@ -157,14 +157,14 @@
 .section-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #F5F1ED;
+    color: var(--text-primary);
     margin: 0 0 1rem 0;
 }
 
 /* Squad Members List */
 .squad-members-list {
-    background: rgba(45, 55, 72, 0.8);
-    border: 1px solid #F5F1ED;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
     border-radius: 8px;
     padding: 1rem;
     max-height: 200px;
@@ -176,17 +176,17 @@
 
 .member-item {
     padding: 0.5rem 0.75rem;
-    background: rgba(23, 42, 58, 0.6);
+    background: var(--bg-input);
     border-radius: 6px;
-    color: #F5F1ED;
+    color: var(--text-primary);
     font-size: 0.9rem;
     border: 1px solid transparent;
     transition: all 0.2s ease;
 }
 
 .member-item:hover {
-    background: rgba(167, 242, 182, 0.1);
-    border-color: rgba(167, 242, 182, 0.3);
+    background: rgba(var(--accent-green-rgb), 0.1);
+    border-color: rgba(var(--accent-green-rgb), 0.3);
 }
 
 /* Settings List */
@@ -201,7 +201,7 @@
     align-items: center;
     gap: 0.75rem;
     cursor: pointer;
-    color: #F5F1ED;
+    color: var(--text-primary);
     font-size: 0.9rem;
     line-height: 1.4;
 }
@@ -213,7 +213,7 @@
 .checkmark {
     width: 20px;
     height: 20px;
-    border: 2px solid #F5F1ED;
+    border: 2px solid var(--text-primary);
     border-radius: 4px;
     display: flex;
     align-items: center;
@@ -223,19 +223,19 @@
 }
 
 .setting-item input[type="checkbox"]:checked + .checkmark {
-    background: #A7F2B6;
-    border-color: #A7F2B6;
+    background: var(--accent-green);
+    border-color: var(--accent-green);
 }
 
 .setting-item input[type="checkbox"]:checked + .checkmark::after {
-    content: '✓';
-    color: #172A3A;
+    content: "\2713";
+    color: var(--text-inverse);
     font-weight: bold;
     font-size: 0.8rem;
 }
 
 .setting-item:hover .checkmark {
-    border-color: #A7F2B6;
+    border-color: var(--accent-green);
 }
 
 /* Form Actions */
@@ -246,8 +246,8 @@
 }
 
 .create-button {
-    background: #FF5BCE;
-    color: #F5F1ED;
+    background: var(--accent-pink);
+    color: var(--text-inverse);
     font-family: 'Orbitron', monospace;
     font-size: 1.1rem;
     font-weight: 700;
@@ -263,9 +263,9 @@
 }
 
 .create-button:hover {
-    background: #FF8E9B;
+    background: var(--accent-pink-soft);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 91, 206, 0.3);
+    box-shadow: 0 8px 25px rgba(var(--accent-pink-rgb), 0.3);
 }
 
 .create-button:active {
@@ -356,15 +356,15 @@
 }
 
 .squad-members-list::-webkit-scrollbar-track {
-    background: rgba(23, 42, 58, 0.3);
+    background: var(--scroll-track);
     border-radius: 3px;
 }
 
 .squad-members-list::-webkit-scrollbar-thumb {
-    background: rgba(167, 242, 182, 0.5);
+    background: var(--scroll-thumb);
     border-radius: 3px;
 }
 
 .squad-members-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(167, 242, 182, 0.7);
+    background: rgba(var(--accent-green-rgb), 0.7);
 }

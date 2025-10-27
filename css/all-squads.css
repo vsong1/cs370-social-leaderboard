@@ -10,11 +10,11 @@
 #squadlist-container {
     max-width: 800px;
     width: 100%;
-    background: rgba(23, 42, 58, 0.9);
-    border: 1px solid #2D3748;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
     border-radius: 16px;
     padding: 2rem;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-lg);
 }
 
 #squadlist-header {
@@ -25,7 +25,7 @@
     font-family: 'Orbitron', monospace;
     font-size: 1.8rem;
     font-weight: 700;
-    color: #F5F1ED;
+    color: var(--text-primary);
     margin: 0;
 }
 
@@ -36,9 +36,9 @@
 }
 
 .pink-btn {
-    border: 3px solid #FF5BCE;
-    background-color: rgba(23, 42, 58);
-    color: #FF5BCE;
+    border: 3px solid var(--accent-pink);
+    background-color: var(--bg-elevated);
+    color: var(--accent-pink);
     font-family: 'Orbitron', monospace;
     font-size: 1.1rem;
     font-weight: 700;
@@ -53,10 +53,10 @@
 }
 
 .pink-btn:hover {
-    background: #FF5BCE;
-    color: rgba(23, 42, 58);
+    background: var(--accent-pink);
+    color: var(--text-inverse);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 91, 206, 0.3);
+    box-shadow: 0 8px 25px rgba(var(--accent-pink-rgb), 0.3);
 }
 
 .pink-btn:active {
@@ -85,7 +85,7 @@
 .squad-card {
     display: block;
     width: 100%;
-    border: 3px solid #F5F1ED;
+    border: 3px solid var(--text-primary);
     border-radius: 16px;
     padding: 2rem;
     overflow: hidden;
@@ -109,10 +109,10 @@
 }
 
 .manage-btn {
-    border: 3px solid #699EFA;
+    border: 3px solid var(--accent-blue);
     width: 100%;
-    background-color: rgba(23, 42, 58);
-    color: #699EFA;
+    background-color: var(--bg-elevated);
+    color: var(--accent-blue);
     font-family: 'Orbitron', monospace;
     font-size: 1rem;
     font-weight: 700;
@@ -127,10 +127,10 @@
 }
 
 .chat-btn {
-    border: 3px solid #A7F2B6;
+    border: 3px solid var(--accent-green);
     width: 100%;
-    background-color: rgba(23, 42, 58);
-    color: #A7F2B6;
+    background-color: var(--bg-elevated);
+    color: var(--accent-green);
     font-family: 'Orbitron', monospace;
     font-size: 1rem;
     font-weight: 700;
@@ -159,20 +159,20 @@
     display: block;
     width: 9rem;
     height: 5rem;
-    border: 3px solid #F5F1ED;
+    border: 3px solid var(--text-primary);
     border-radius: 16px;
     padding: 1em;
     font-size: 14px;
     text-align: center;
     align-content: center;
-    text-shadow: 0 0 5px #2D3748;
+    text-shadow: 0 0 5px var(--border-strong);
     overflow-wrap: break-word;
 }
 
 /* Squad Members List */
 .squad-members-list {
-    background: rgba(45, 55, 72, 0.8);
-    border: 1px solid #F5F1ED;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
     border-radius: 8px;
     padding: 1rem;
     max-height: 200px;
@@ -206,3 +206,4 @@
         width: 45%;
     }
 }
+
