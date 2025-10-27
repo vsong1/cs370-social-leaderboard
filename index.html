@@ -13,6 +13,10 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
+            <div class="nav-greeting">
+                <span id="nav-greeting-text">Welcome to Squad Score!</span>
+            </div>
+            
             <!-- Hamburger button -->
             <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false">
                 <span class="bar"></span>
@@ -36,8 +40,8 @@
                 <span class="squad-text">Squad</span>
                 <span class="score-text">Score</span>
             </h1>
-            <button class="cta-button" onclick="viewLeaderboards()">
-                VIEW LEADERBOARDS &gt;
+            <button class="cta-button" id="cta-button" onclick="handleCTAClick()">
+                Hi, sign in or register
             </button>
         </div>
     </main>
