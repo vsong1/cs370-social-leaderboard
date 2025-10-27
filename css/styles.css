@@ -207,8 +207,7 @@ body {
 @media (max-width: 768px) {
     .theme-toggle {
         width: 100%;
-        margin-left: 0;
-        margin-top: 0.75rem;
+        margin: 0 0 1rem;
         justify-content: center;
     }
 }
@@ -253,7 +252,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    min-height: 80vh;
     /* padding-top: 80px; Account for fixed navbar */
 }
 
@@ -805,7 +804,12 @@ body {
     box-shadow: var(--input-focus-ring);
 }
 
-.chat-send-button {`r`n    padding: 0.9rem 1.5rem;`r`n    border-radius: 10px;`r`n    border: none;`r`n    background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink));`r`n    color: var(--text-inverse);
+.chat-send-button {
+    padding: 0.9rem 1.5rem;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink));
+    color: var(--text-inverse);
     font-family: 'Orbitron', monospace;
     font-weight: 700;
     text-transform: uppercase;
