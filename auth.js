@@ -101,6 +101,10 @@ class AuthService {
             // Store user info in localStorage for other pages
             localStorage.setItem('user', JSON.stringify(this.user));
             localStorage.setItem('isAuthenticated', 'true');
+            // Update home page UI if on home page
+            if (typeof updateUIForAuth === 'function') {
+                updateUIForAuth();
+            }
 
         } else {
             // User is not logged in
@@ -126,6 +130,10 @@ class AuthService {
             // Clear stored user info
             localStorage.removeItem('user');
             localStorage.removeItem('isAuthenticated');
+            // Update home page UI if on home page
+            if (typeof updateUIForAuth === 'function') {
+                updateUIForAuth();
+            }
         }
     }
 
