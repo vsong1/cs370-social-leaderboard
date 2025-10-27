@@ -34,22 +34,15 @@ function handleNavigation(page) {
             window.location.href = 'index.html';
             break;
         case 'Leaderboards':
-            // Future: Navigate to leaderboards page
-            alert('Leaderboards page coming soon!');
+            // Navigate to all leaderboards page
+            window.location.href = 'all-leaderboards.html';
             break;
         case 'My Squads':
             // Navigate to chat page for squads
             window.location.href = 'chat.html';
             break;
-        case 'My Profile':
-            // Check if user is authenticated
-            if (window.authService && window.authService.getIsAuthenticated()) {
-                // User is logged in - could show profile page or dashboard
-                alert('Profile page coming soon!');
-            } else {
-                // User is not logged in - go to login page
-                window.location.href = 'login.html';
-            }
+        case 'Profile':
+            window.location.href = 'profile.html';
             break;
     }
 }
@@ -64,8 +57,8 @@ function viewLeaderboards() {
     
     setTimeout(() => {
         button.style.transform = '';
-        // Future: Navigate to leaderboards or show modal
-        alert('Leaderboards feature coming soon! 🏆');
+        // Navigate to all leaderboards page
+        window.location.href = 'all-leaderboards.html';
     }, 150);
 }
 
