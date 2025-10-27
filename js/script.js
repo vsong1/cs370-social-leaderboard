@@ -286,34 +286,35 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 // Search functionality for leaderboard
-function initializeSearch() {
-    const searchInput = document.getElementById('player-search');
-    const leaderboardList = document.getElementById('leaderboard-list');
+function initializeLeaderboardSearch() {
+    const searchInput = document.getElementById('leaderboard-search');
+    const leaderboardsList = document.getElementById('leaderboards-list');
     
-    if (!searchInput || !leaderboardList) {
-        console.log('Search elements not found');
+    if (!searchInput || !leaderboardsList) {
+        console.log('Leaderboard search elements not found');
         return;
     }
     
     // Add event listener for search input
     searchInput.addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase().trim();
-        const entries = leaderboardList.querySelectorAll('.leaderboard-entry');
+        const cards = leaderboardsList.querySelectorAll('.leaderboard-card');
         
-        entries.forEach(entry => {
-            const playerName = entry.querySelector('.player-name').textContent.toLowerCase();
+        cards.forEach(card => {
+            const leaderboardName = card.querySelector('.leaderboard-name').textContent.toLowerCase();
+            const leaderboardGame = card.querySelector('.leaderboard-game').textContent.toLowerCase();
             
             if (searchTerm === '') {
-                // Show all entries
-                entry.classList.remove('hidden', 'highlighted');
-            } else if (playerName.includes(searchTerm)) {
-                // Show and highlight matching entries
-                entry.classList.remove('hidden');
-                entry.classList.add('highlighted');
+                // Show all cards
+                card.classList.remove('hidden', 'highlighted');
+            } else if (leaderboardName.includes(searchTerm) || leaderboardGame.includes(searchTerm)) {
+                // Show and highlight matching cards
+                card.classList.remove('hidden');
+                card.classList.add('highlighted');
             } else {
-                // Hide non-matching entries
-                entry.classList.add('hidden');
-                entry.classList.remove('highlighted');
+                // Hide non-matching cards
+                card.classList.add('hidden');
+                card.classList.remove('highlighted');
             }
         });
         
@@ -334,8 +335,8 @@ function initializeSearch() {
     });
 }
 
-function clearSearch() {
-    const searchInput = document.getElementById('player-search');
+function clearLeaderboardSearch() {
+    const searchInput = document.getElementById('leaderboard-search');
     if (searchInput) {
         searchInput.value = '';
         searchInput.dispatchEvent(new Event('input'));
@@ -345,9 +346,9 @@ function clearSearch() {
 
 // Initialize search when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if we're on the leaderboard page
-    if (document.getElementById('player-search')) {
-        initializeSearch();
+    // Check if we're on the all-leaderboards page
+    if (document.getElementById('leaderboard-search')) {
+        initializeLeaderboardSearch();
     }
 });
 
