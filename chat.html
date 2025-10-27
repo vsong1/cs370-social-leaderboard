@@ -3,22 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Squads Chat - Squad Score</title>
+    <title>Squad Chat - Squad Score</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/burger-menu.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-greeting">
-                <span>Hi Georgia!</span>
+                <span>Ready to compete, Georgia!</span>
             </div>
+
+            <!-- Hamburger button -->
+            <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+
             <div class="nav-links">
                 <a href="index.html" class="nav-link">Home</a>
                 <a href="all-leaderboards.html" class="nav-link">Leaderboards</a>
-                <a href="all-squads.html" class="nav-link active">My Squads</a>
+                <a href="chat.html" class="nav-link active">My Squads</a>
                 <a href="profile.html" class="nav-link">Profile</a>
             </div>
         </div>
@@ -29,6 +38,15 @@
             <div class="chat-sidebar-header">
                 <h2 class="chat-sidebar-title">Your Squads</h2>
                 <span class="chat-badge">3 Active</span>
+            </div>
+
+            <div class="chat-sidebar-actions">
+                <button class="chat-global-button" type="button" onclick="window.location.href='createsquad.html'">
+                    + Create Squad
+                </button>
+                <button class="chat-global-button" type="button" onclick="window.location.href='joinsquad.html'">
+                    Join Squad
+                </button>
             </div>
 
             <div class="chat-search">
@@ -116,64 +134,12 @@
     <script src="supabase-auth.js"></script>
     <!-- Site Scripts -->
     <script src="js/script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const squadCards = document.querySelectorAll('.chat-squad-card');
-            const messageList = document.getElementById('chat-message-list');
-            const composerForm = document.getElementById('chat-composer');
-            const messageField = document.getElementById('chat-message');
+    <script src="js/chat-msgs.js"></script>
+    <script src="js/theme-toggle.js"></script>
 
-            squadCards.forEach(card => {
-                card.addEventListener('click', () => {
-                    squadCards.forEach(c => {
-                        c.classList.remove('active');
-                        c.setAttribute('aria-selected', 'false');
-                    });
-                    card.classList.add('active');
-                    card.setAttribute('aria-selected', 'true');
-                    // Placeholder for future squad switching logic
-                });
-            });
+    <!-- Hamburger menu for navbar -->
+    <script src="js/burger-menu.js"></script>
 
-            composerForm.addEventListener('submit', (event) => {
-                event.preventDefault();
-                const message = messageField.value.trim();
-
-                if (!message) {
-                    return;
-                }
-
-                const messageArticle = document.createElement('article');
-                messageArticle.className = 'chat-message outgoing';
-                messageArticle.dataset.author = 'You';
-
-                const header = document.createElement('div');
-                header.className = 'chat-message-header';
-
-                const author = document.createElement('span');
-                author.textContent = 'You';
-
-                const timestamp = document.createElement('time');
-                const now = new Date();
-                const hours = now.getHours().toString().padStart(2, '0');
-                const minutes = now.getMinutes().toString().padStart(2, '0');
-                timestamp.dateTime = now.toISOString();
-                timestamp.textContent = `${hours}:${minutes}`;
-
-                header.append(author, timestamp);
-
-                const body = document.createElement('p');
-                body.className = 'chat-message-body';
-                body.textContent = message;
-
-                messageArticle.append(header, body);
-                messageList.appendChild(messageArticle);
-                messageList.scrollTop = messageList.scrollHeight;
-
-                composerForm.reset();
-                messageField.focus();
-            });
-        });
-    </script>
 </body>
 </html>
+

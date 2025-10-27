@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Squad Score - Leaderboard</title>
+    <title>My Squads - Squad Score</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/burger-menu.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/all-squads.css">
 
@@ -15,8 +16,16 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-greeting">
-                <span>Welcome to Squad Score!</span>
+                <span>Ready to compete, Georgia!</span>
             </div>
+
+            <!-- Hamburger button -->
+            <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+
             <div class="nav-links">
                 <a href="index.html" class="nav-link">Home</a>
                 <a href="all-leaderboards.html" class="nav-link">Leaderboards</a>
@@ -27,6 +36,36 @@
     </nav>
 
     <main class="squadlist-content">
+        <div id="squadlist-container">
+            <div id="squadlist-header">
+                <h1>My Squads</h1>
+                <div id="squadlist-actions">
+                    <button class="pink-btn" onclick="window.location.href='create-squad.html'">
+                        Join Squad
+                    </button>
+                    <button class="pink-btn" onclick="window.location.href='create-squad.html'">
+                        Create New Squad
+                    </button>
+                </div>
+            </div>
+            
+            <div class="squads-list">
+                <div class="squad-card">
+                    <div class="squad-info">
+                        <h3 class="squad-name">Top Squad</h3>
+                        <p class="squad-members">10 friends</p>
+                        <button class="manage-btn" onclick="window.location.href='createsquad.html'">Manage</button>
+                        <button class="chat-btn" onclick="window.location.href='chat.html'">Open Chat</button>
+                    </div>
+                    <div class="shortlb-list">
+                        <div class="shortlb-tile" style="background:rgb(167,242,182,0.5);" onclick="window.location.href='leaderboard.html'"><p>Foosball Friends</p></div>
+                        <div class="shortlb-tile" style="background:rgb(251,139,36,0.5);" onclick="window.location.href='leaderboard.html'"><p>Valorant Legends</p></div>
+                        <div class="shortlb-tile" style="background:rgb(167,242,182,0.5);" onclick="window.location.href='leaderboard.html'"><p>CS:GO Allstars</p></div>
+                        <div class="shortlb-tile" onclick="window.location.href='create-leaderboard.html'"><p class="shortlb-new">+ New Leaderboard</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
     
     <!-- Supabase CDN -->
@@ -35,5 +74,11 @@
     <script src="supabase-auth.js"></script>
     <!-- Site Scripts -->
     <script src="js/script.js"></script>
+    <script src="js/theme-toggle.js"></script>
+
+    <!-- Hamburger menu for navbar -->
+    <script src="js/burger-menu.js"></script>
+
 </body>
 </html>
+

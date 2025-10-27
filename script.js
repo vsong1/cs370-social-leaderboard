@@ -1,5 +1,5 @@
 // Interactive functionality for Squad Score website
-
+console.log('Script.js loaded - handleCTAClick function available:', typeof handleCTAClick);
 // Navigation functionality
 document.addEventListener('DOMContentLoaded', function() {
     // Handle navigation link clicks
@@ -34,43 +34,82 @@ function handleNavigation(page) {
             window.location.href = 'index.html';
             break;
         case 'Leaderboards':
-            // Future: Navigate to leaderboards page
-            alert('Leaderboards page coming soon!');
+            // Navigate to all leaderboards page
+            window.location.href = 'all-leaderboards.html';
             break;
         case 'My Squads':
             // Navigate to chat page for squads
             window.location.href = 'chat.html';
             break;
-        case 'My Profile':
-            // Check if user is authenticated
-            if (window.authService && window.authService.getIsAuthenticated()) {
-                // User is logged in - could show profile page or dashboard
-                alert('Profile page coming soon!');
-            } else {
-                // User is not logged in - go to login page
-                window.location.href = 'login.html';
-            }
+        case 'Profile':
+            window.location.href = 'profile.html';
             break;
     }
 }
 
-// CTA Button functionality
-function viewLeaderboards() {
-    console.log('View Leaderboards clicked');
+// CTA Button functionality - authentication aware
+function handleCTAClick() {
+    console.log('CTA button clicked - handleCTAClick function called');
     
     // Add click animation
     const button = document.querySelector('.cta-button');
-    button.style.transform = 'scale(0.95)';
+    if (button) {
+        button.style.transform = 'scale(0.95)';
+        
+        setTimeout(() => {
+            button.style.transform = '';
+            
+            // Check if user is authenticated
+            if (window.authService && window.authService.getIsAuthenticated()) {
+                // User is logged in - navigate to leaderboards
+                console.log('User is authenticated, navigating to leaderboards');
+                window.location.href = 'all-leaderboards.html';
+            } else {
+                // User is not logged in - navigate to login page
+                console.log('User is not authenticated, navigating to login');
+                window.location.href = 'login.html';
+            }
+        }, 150);
+    } else {
+        console.error('CTA button not found!');
+    }
+}
+// Update UI based on authentication status
+function updateUIForAuth() {
+    const navGreeting = document.getElementById('nav-greeting-text');
+    const ctaButton = document.getElementById('cta-button');
     
-    setTimeout(() => {
-        button.style.transform = '';
-        // Future: Navigate to leaderboards or show modal
-        alert('Leaderboards feature coming soon! 🏆');
-    }, 150);
+    if (window.authService && window.authService.getIsAuthenticated()) {
+        // User is logged in
+        const user = window.authService.getUser();
+        const userName = user ? (user.name || user.email || 'User') : 'User';
+        
+        if (navGreeting) {
+            navGreeting.textContent = `Hi, ${userName}!`;
+        }
+        
+        if (ctaButton) {
+            ctaButton.textContent = 'VIEW LEADERBOARDS >';
+        }
+    } else {
+        // User is not logged in
+        if (navGreeting) {
+            navGreeting.textContent = 'Welcome to Squad Score!';
+        }
+        
+        if (ctaButton) {
+            ctaButton.textContent = 'Hi, sign in or register';
+        }
+    }
 }
 
 // Add some interactive effects
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded - handleCTAClick function available:', typeof handleCTAClick);
+    console.log('CTA button element:', document.getElementById('cta-button'));
+    // Update UI based on authentication status
+    updateUIForAuth();
+    
     // Add hover effect to navigation greeting
     const greeting = document.querySelector('.nav-greeting span');
     if (greeting) {
@@ -83,7 +122,13 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.color = '#ffffff';
         });
     }
-    
+    // Listen for authentication state changes
+    if (window.authService) {
+        // Update UI when auth service is ready
+        setTimeout(() => {
+            updateUIForAuth();
+        }, 1000);
+    }
     // Add typing effect to welcome text (optional enhancement)
     const welcomeText = document.querySelector('.welcome-text');
     if (welcomeText) {

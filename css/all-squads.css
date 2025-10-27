@@ -1,0 +1,209 @@
+/* All Squads Page Styles */
+.squadlist-content {
+    min-height: 100vh;
+    padding: 6rem 2rem 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+#squadlist-container {
+    max-width: 800px;
+    width: 100%;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+}
+
+#squadlist-header {
+    margin-bottom: 2rem;
+}
+
+#squadlist-header h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+#squadlist-actions {
+    display: flex;
+    margin-top: 1rem;
+    gap: 1rem;
+}
+
+.pink-btn {
+    border: 3px solid var(--accent-pink);
+    background-color: var(--bg-elevated);
+    color: var(--accent-pink);
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.pink-btn:hover {
+    background: var(--accent-pink);
+    color: var(--text-inverse);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(var(--accent-pink-rgb), 0.3);
+}
+
+.pink-btn:active {
+    transform: translateY(0);
+}
+
+.pink-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.pink-btn:hover::before {
+    left: 100%;
+}
+
+.squads-list {
+    max-width: 800px;
+}
+
+.squad-card {
+    display: block;
+    width: 100%;
+    border: 3px solid var(--text-primary);
+    border-radius: 16px;
+    padding: 2rem;
+    overflow: hidden;
+}
+
+.squad-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.squad-name {
+    min-width: 25%;
+    font-family: 'Orbitron', monospace;
+}
+
+.squad-members {
+    min-width: 20%;
+    font-family: 'Orbitron', monospace;
+}
+
+.manage-btn {
+    border: 3px solid var(--accent-blue);
+    width: 100%;
+    background-color: var(--bg-elevated);
+    color: var(--accent-blue);
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.chat-btn {
+    border: 3px solid var(--accent-green);
+    width: 100%;
+    background-color: var(--bg-elevated);
+    color: var(--accent-green);
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.shortlb-list {
+    display: flex;
+    gap: 1em;
+    margin-top: 2rem;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.shortlb-tile {
+    font-family: 'Orbitron', monospace;
+    font-weight: bold;
+    display: block;
+    width: 9rem;
+    height: 5rem;
+    border: 3px solid var(--text-primary);
+    border-radius: 16px;
+    padding: 1em;
+    font-size: 14px;
+    text-align: center;
+    align-content: center;
+    text-shadow: 0 0 5px var(--border-strong);
+    overflow-wrap: break-word;
+}
+
+/* Squad Members List */
+.squad-members-list {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .squadlist-content {
+        padding: 5rem 1rem 2rem;
+    }
+    
+    .squadlist-container {
+        padding: 1.5rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .squadlist-header {
+        font-size: 1.5rem;
+    }
+
+    .squad-info {
+        flex-wrap: wrap;
+    }
+
+    .shortlb-tile {
+        width: 45%;
+    }
+}
+

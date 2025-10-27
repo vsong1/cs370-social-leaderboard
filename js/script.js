@@ -34,11 +34,11 @@ function handleNavigation(page) {
             window.location.href = 'index.html';
             break;
         case 'Leaderboards':
-            // Navigate to leaderboards page
-            window.location.href = 'leaderboard.html';
+            // Navigate to all leaderboards page
+            window.location.href = 'all-leaderboards.html';
             break;
         case 'My Squads':
-            // Navigate to chat page for squads
+            // Navigate to squad chat hub
             window.location.href = 'chat.html';
             break;
         case 'Profile':
@@ -58,8 +58,8 @@ function viewLeaderboards() {
         
         setTimeout(() => {
             button.style.transform = '';
-            // Navigate to leaderboards page
-            window.location.href = 'leaderboard.html';
+            // Navigate to all leaderboards page
+            window.location.href = 'all-leaderboards.html';
         }, 150);
     }
 }
@@ -67,9 +67,8 @@ function viewLeaderboards() {
 // Leaderboard page functionality
 function goBackToLeaderboards() {
     console.log('Back to Leaderboards clicked');
-    // For now, just go back to home page
-    // In a real app, this might go to a main leaderboards listing
-    window.location.href = 'index.html';
+    // Navigate to all leaderboards page
+    window.location.href = 'all-leaderboards.html';
 }
 
 function openSquadChat() {
@@ -285,4 +284,82 @@ document.addEventListener('DOMContentLoaded', function() {
 
     refreshDisplays();
 })();
+
+// Search functionality for leaderboard
+function initializeLeaderboardSearch() {
+    const searchInput = document.getElementById('leaderboard-search');
+    const leaderboardsList = document.getElementById('leaderboards-list');
+    
+    if (!searchInput || !leaderboardsList) {
+        console.log('Leaderboard search elements not found');
+        return;
+    }
+    
+    // Add event listener for search input
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        const cards = leaderboardsList.querySelectorAll('.leaderboard-card');
+        
+        cards.forEach(card => {
+            const leaderboardName = card.querySelector('.leaderboard-name').textContent.toLowerCase();
+            const leaderboardGame = card.querySelector('.leaderboard-game').textContent.toLowerCase();
+            
+            if (searchTerm === '') {
+                // Show all cards
+                card.classList.remove('hidden', 'highlighted');
+            } else if (leaderboardName.includes(searchTerm) || leaderboardGame.includes(searchTerm)) {
+                // Show and highlight matching cards
+                card.classList.remove('hidden');
+                card.classList.add('highlighted');
+            } else {
+                // Hide non-matching cards
+                card.classList.add('hidden');
+                card.classList.remove('highlighted');
+            }
+        });
+        
+        // Update search button visibility
+        const searchButton = document.querySelector('.search-button');
+        if (searchButton) {
+            searchButton.style.display = searchTerm ? 'flex' : 'none';
+        }
+    });
+    
+    // Add keyboard shortcuts
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            this.dispatchEvent(new Event('input'));
+            this.blur();
+        }
+    });
+    // Mobile-friendly: Add touch events for better mobile experience
+    searchInput.addEventListener('touchstart', function() {
+        this.focus();
+    });
+    
+    // Prevent zoom on double-tap for mobile
+    searchInput.addEventListener('touchend', function(e) {
+        e.preventDefault();
+    });
+}
+
+function clearLeaderboardSearch() {
+    const searchInput = document.getElementById('leaderboard-search');
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.focus();
+    }
+}
+
+// Initialize search when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're on the all-leaderboards page
+    if (document.getElementById('leaderboard-search')) {
+        initializeLeaderboardSearch();
+    }
+});
+
+
 

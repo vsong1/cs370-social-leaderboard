@@ -1,0 +1,258 @@
+/* Squads page specific styles */
+.squadlist-content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 6rem 2rem 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.join-alone {
+    min-height: 100vh;
+    justify-content: center;
+}
+
+.squad-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.squad-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    margin-bottom: 0.4rem;
+}
+
+.squad-subtitle {
+    color: rgba(var(--text-primary-rgb), 0.75);
+    font-size: 0.95rem;
+}
+
+.create-squad-toggle {
+    padding: 0.85rem 1.6rem;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--accent-orange-rgb), 0.8);
+    background: transparent;
+    color: var(--accent-orange);
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.create-squad-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(var(--accent-orange-rgb), 0.25);
+}
+
+.create-squad-panel {
+    padding: 1.75rem;
+    border-radius: 20px;
+    background: var(--bg-panel);
+    border: 1px solid rgba(var(--accent-green-rgb), 0.25);
+    box-shadow: var(--shadow-md);
+}
+
+.join-squad-panel {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.join-squad-panel .panel-title {
+    margin-bottom: 0.35rem;
+}
+
+.join-squad-panel .panel-subtitle {
+    margin-bottom: 0.9rem;
+}
+
+.panel-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.35rem;
+}
+
+.panel-subtitle {
+    color: rgba(var(--text-primary-rgb), 0.7);
+    font-size: 0.9rem;
+}
+
+#create-squad-form {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-field label {
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(var(--text-primary-rgb), 0.6);
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    padding: 0.85rem 1rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+    outline: none;
+    border-color: var(--accent-green);
+    box-shadow: var(--input-focus-ring);
+}
+
+.form-field textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.form-cancel,
+.form-submit {
+    padding: 0.85rem 1.6rem;
+    border-radius: 999px;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.form-cancel {
+    background: var(--bg-elevated);
+    color: rgba(var(--text-primary-rgb), 0.85);
+    border: 1px solid var(--border-soft);
+}
+
+.form-submit {
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-green-strong));
+    color: var(--text-inverse);
+}
+
+.form-cancel:hover,
+.form-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.form-cancel:disabled,
+.form-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.form-error {
+    margin-top: -0.4rem;
+    color: var(--accent-pink);
+    font-size: 0.9rem;
+}
+
+.form-success {
+    margin-top: -0.4rem;
+    color: var(--accent-green-strong);
+    font-size: 0.9rem;
+}
+
+.join-actions {
+    justify-content: flex-start;
+    margin-top: 1.1rem;
+}
+
+.squad-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.squad-card {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1.75rem;
+    border-radius: 20px;
+    background: var(--bg-overlay);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-lg);
+}
+
+.squad-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.squad-card-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.squad-badge {
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(var(--accent-orange-rgb), 0.18);
+    color: var(--accent-orange);
+}
+
+.squad-card-meta {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    color: rgba(var(--text-primary-rgb), 0.7);
+    font-size: 0.9rem;
+}
+
+.squad-card-description {
+    color: rgba(var(--text-primary-rgb), 0.78);
+}
+
+.empty-state {
+    padding: 2.5rem;
+    border-radius: 20px;
+    text-align: center;
+    border: 1px dashed rgba(var(--accent-green-rgb), 0.3);
+    background: var(--bg-card);
+    color: rgba(var(--text-primary-rgb), 0.75);
+}
+
+@media (max-width: 640px) {
+    .squadlist-content {
+        padding: 5.5rem 1.25rem 3rem;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .form-cancel,
+    .form-submit {
+        width: 100%;
+    }
+}
