@@ -43,7 +43,17 @@
             </button>
         </div>
         
-        <div class="leaderboards-list">
+        <!-- Search Bar -->
+        <div class="search-container">
+            <div class="search-bar">
+                <input type="text" id="leaderboard-search" placeholder="Search leaderboards..." class="search-input">
+                <button class="search-button" onclick="clearLeaderboardSearch()">
+                    <span class="search-icon">×</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="leaderboards-list" id="leaderboards-list">
             <div class="leaderboard-card">
                 <div class="leaderboard-info">
                     <h3 class="leaderboard-name">Foosball Friends</h3>
