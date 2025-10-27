@@ -37,18 +37,21 @@
                     
                     <div class="form-group">
                         <label for="emailAddress" class="form-label">Email Address:</label>
-                        <input type="text" id="emailAddress" name="emailAddress" class="form-input" required>
+                        <input type="email" id="emailAddress" name="emailAddress" class="form-input" required>
                     </div>
 
                     <div class="form-group">
                         <label for="password" class="form-label">Password:</label>
-                        <input type="password" id="password" name="password" class="form-input" required>
+                        <input type="password" id="password" name="password" class="form-input" required minlength="6">
                     </div>
 
                     <div class="form-group">
                         <label for="confirmPassword" class="form-label">Confirm Password:</label>
                         <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" required>
                     </div>
+                    
+                    <div id="error-message" style="color: #ff4444; margin-top: 10px; display: none;"></div>
+                    <div id="success-message" style="color: #68D391; margin-top: 10px; display: none;"></div>
                     
                     <button type="submit" class="signup-button">
                         Register Now >
@@ -64,84 +67,71 @@
         </div>
     </main>
 
-    <!-- Auth0 SDK -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
-    
-    <!-- Auth0 Configuration -->
-    <script src="auth-config.js"></script>
-    
-    <!-- Auth0 Authentication Module -->
-    <script type="module" src="auth.js"></script>
-    
-    <!-- Upstream site scripts -->
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Auth System -->
+    <script src="supabase-auth.js"></script>
+    <!-- Site Scripts -->
     <script src="js/script.js"></script>
     <script>
-        // Signup form functionality with Auth0
-        document.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('load', async function() {
+            // Wait for auth to initialize
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Check if already logged in
+            const user = await window.SquadScoreAuth.getUser();
+            if (user) {
+                console.log('Already logged in, redirecting...');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Handle signup form
             const signupForm = document.querySelector('.login-form');
             const signupButton = document.querySelector('.signup-button');
-            const loginButton = document.querySelector('.login-button');
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
             
-            // Wait for Auth0 to initialize
-            setTimeout(() => {
-                if (window.authService) {
-                    // Check if user is already authenticated
-                    if (window.authService.getIsAuthenticated()) {
-                        // Redirect to home page if already logged in
-                        window.location.href = 'index.html';
-                        return;
-                    }
-                    
-                    // Set up Auth0 signup button
-                    signupButton.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        
-                        // Add click animation
-                        signupButton.style.transform = 'scale(0.95)';
-                        
-                        setTimeout(() => {
-                            signupButton.style.transform = '';
-                            window.authService.signup();
-                        }, 150);
-                    });
-                    
-                    // Set up back to login button
-                    loginButton.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        
-                        // Add click animation
-                        loginButton.style.transform = 'scale(0.95)';
-                        
-                        setTimeout(() => {
-                            loginButton.style.transform = '';
-                            window.location.href = 'login.html';
-                        }, 150);
-                    });
+            signupForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const email = document.getElementById('emailAddress').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                errorMessage.style.display = 'none';
+                successMessage.style.display = 'none';
+                
+                // Validate passwords match
+                if (password !== confirmPassword) {
+                    errorMessage.textContent = 'Passwords do not match';
+                    errorMessage.style.display = 'block';
+                    return;
                 }
-            }, 1000);
-            
-            // Add hover effects
-            signupButton.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 0 20px rgba(167, 242, 182, 0.4)';
-            });
-            
-            signupButton.addEventListener('mouseleave', function() {
-                this.style.transform = '';
-                this.style.boxShadow = '';
-            });
-            
-            loginButton.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 0 20px rgba(251, 139, 36, 0.4)';
-            });
-            
-            loginButton.addEventListener('mouseleave', function() {
-                this.style.transform = '';
-                this.style.boxShadow = '';
+                
+                console.log('Attempting signup...');
+                signupButton.disabled = true;
+                signupButton.textContent = 'Creating Account...';
+                
+                const { data, error } = await window.SquadScoreAuth.signUp(email, password, username);
+                
+                if (error) {
+                    console.error('Signup failed:', error.message);
+                    errorMessage.textContent = error.message;
+                    errorMessage.style.display = 'block';
+                    signupButton.disabled = false;
+                    signupButton.textContent = 'Register Now >';
+                } else {
+                    console.log('Signup successful!');
+                    successMessage.textContent = 'Account created! Redirecting to login...';
+                    successMessage.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                }
             });
         });
-        
     </script>
 </body>
 </html>

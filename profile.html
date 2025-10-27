@@ -24,7 +24,7 @@
         </div>
     </nav>
 
-    <main class="profile-main">
+    <main class="profile-main" id="profile-content" style="display: none;">
         <section class="profile-container" data-animate-on-scroll>
             <header class="profile-header">
                 <div class="profile-avatar" aria-label="Georgia Walsh avatar">
@@ -86,9 +86,92 @@
                 <button class="profile-action-button profile-action-cancel" type="button" data-profile-action="cancel">Cancel</button>
                 <button class="profile-action-button profile-action-submit" type="submit" form="profile-form" data-profile-action="submit">Save Changes</button>
             </div>
+            
+            <!-- Logout Button -->
+            <div style="margin-top: 20px; text-align: center;">
+                <button id="profile-logout-btn" class="profile-action-button" type="button" style="background-color: #EF4444; border-color: #EF4444;">
+                    Logout
+                </button>
+            </div>
         </section>
     </main>
 
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Auth System -->
+    <script src="supabase-auth.js"></script>
+    <!-- Site Scripts -->
     <script src="js/script.js"></script>
+    <script>
+        window.addEventListener('load', async function() {
+            // Wait for auth to initialize
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Check if logged in - redirect if not
+            const user = await window.SquadScoreAuth.getUser();
+            if (!user) {
+                console.log('Not logged in, redirecting to login...');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // User is logged in - show the profile content
+            document.getElementById('profile-content').style.display = 'block';
+            console.log('Loading profile for user:', user.email);
+            
+            // Setup logout button
+            const logoutBtn = document.getElementById('profile-logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    console.log('🔴 LOGOUT BUTTON CLICKED');
+                    
+                    if (confirm('Are you sure you want to logout?')) {
+                        logoutBtn.textContent = 'Logging out...';
+                        logoutBtn.disabled = true;
+                        
+                        const { error } = await window.SquadScoreAuth.signOut();
+                        
+                        if (error) {
+                            alert('Logout error: ' + error.message);
+                            logoutBtn.disabled = false;
+                            logoutBtn.textContent = 'Logout';
+                        } else {
+                            console.log('✅ LOGOUT SUCCESSFUL - Redirecting...');
+                            window.location.href = 'index.html';
+                        }
+                    }
+                });
+            }
+            
+            // Load user profile from database
+            const client = window.SquadScoreAuth.getClient();
+            if (client) {
+                const { data: profile, error } = await client
+                    .from('user')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+                
+                if (!error && profile) {
+                    console.log('Profile loaded:', profile);
+                    
+                    // Update form with real data
+                    if (profile.first_name) document.getElementById('profile-first-name').value = profile.first_name;
+                    if (profile.last_name) document.getElementById('profile-last-name').value = profile.last_name;
+                    if (profile.username) document.getElementById('profile-username').value = profile.username;
+                    if (profile.email) document.getElementById('profile-email').value = profile.email;
+                    
+                    // Update display
+                    const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+                    const displayName = fullName || profile.username || 'User';
+                    const nameElement = document.querySelector('[data-profile-field="fullName"]');
+                    if (nameElement) nameElement.textContent = displayName;
+                } else {
+                    console.log('Profile not found or error:', error);
+                }
+            }
+        });
+    </script>
 </body>
 </html>

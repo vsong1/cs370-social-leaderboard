@@ -30,14 +30,16 @@
             <div class="login-form-container">
                 <form class="login-form">
                     <div class="form-group">
-                        <label for="username" class="form-label">User Name:</label>
-                        <input type="text" id="username" name="username" class="form-input" required>
+                        <label for="email" class="form-label">Email:</label>
+                        <input type="email" id="email" name="email" class="form-input" required>
                     </div>
                     
                     <div class="form-group">
                         <label for="password" class="form-label">Password:</label>
                         <input type="password" id="password" name="password" class="form-input" required>
                     </div>
+                    
+                    <div id="error-message" style="color: #ff4444; margin-top: 10px; display: none;"></div>
                     
                     <button type="submit" class="login-button">Login ></button>
                     
@@ -51,84 +53,59 @@
         </div>
     </main>
 
-    <!-- Auth0 SDK -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
-    
-    <!-- Auth0 Configuration -->
-    <script src="auth-config.js"></script>
-    
-    <!-- Auth0 Authentication Module -->
-    <script type="module" src="auth.js"></script>
-    
-    <!-- Upstream site scripts -->
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Auth System -->
+    <script src="supabase-auth.js"></script>
+    <!-- Site Scripts -->
     <script src="js/script.js"></script>
     <script>
-        // Login form functionality with Auth0
-        document.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('load', async function() {
+            // Wait for auth to initialize
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Check if already logged in
+            const user = await window.SquadScoreAuth.getUser();
+            if (user) {
+                console.log('Already logged in, redirecting...');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Handle login form
             const loginForm = document.querySelector('.login-form');
             const loginButton = document.querySelector('.login-button');
-            const signupButton = document.querySelector('.signup-button');
+            const errorMessage = document.getElementById('error-message');
             
-            // Wait for Auth0 to initialize
-            setTimeout(() => {
-                if (window.authService) {
-                    // Check if user is already authenticated
-                    if (window.authService.getIsAuthenticated()) {
-                        // Redirect to home page if already logged in
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                console.log('Attempting login...');
+                
+                errorMessage.style.display = 'none';
+                loginButton.disabled = true;
+                loginButton.textContent = 'Logging in...';
+                
+                const { data, error } = await window.SquadScoreAuth.signIn(email, password);
+                
+                if (error) {
+                    console.error('Login failed:', error.message);
+                    errorMessage.textContent = error.message;
+                    errorMessage.style.display = 'block';
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Login >';
+                } else {
+                    console.log('Login successful! Redirecting...');
+                    loginButton.textContent = 'Success!';
+                    setTimeout(() => {
                         window.location.href = 'index.html';
-                        return;
-                    }
-                    
-                    // Set up Auth0 login button
-                    loginButton.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        
-                        // Add click animation
-                        loginButton.style.transform = 'scale(0.95)';
-                        
-                        setTimeout(() => {
-                            loginButton.style.transform = '';
-                            window.authService.login();
-                        }, 150);
-                    });
-                    
-                    // Set up Auth0 signup button
-                    signupButton.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        
-                        // Add click animation
-                        signupButton.style.transform = 'scale(0.95)';
-                        
-                        setTimeout(() => {
-                            signupButton.style.transform = '';
-                            window.authService.signup();
-                        }, 150);
-                    });
+                    }, 500);
                 }
-            }, 1000);
-            
-            // Add hover effects
-            loginButton.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 0 20px rgba(167, 242, 182, 0.4)';
-            });
-            
-            loginButton.addEventListener('mouseleave', function() {
-                this.style.transform = '';
-                this.style.boxShadow = '';
-            });
-            
-            signupButton.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 0 20px rgba(251, 139, 36, 0.4)';
-            });
-            
-            signupButton.addEventListener('mouseleave', function() {
-                this.style.transform = '';
-                this.style.boxShadow = '';
             });
         });
-
     </script>
 </body>
 </html>
