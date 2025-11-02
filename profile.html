@@ -34,12 +34,12 @@
     <main class="profile-main" id="profile-content" style="display: none;">
         <section class="profile-container" data-animate-on-scroll>
             <header class="profile-header">
-                <div class="profile-avatar" aria-label="Georgia Walsh avatar">
-                    <span>GW</span>
+                <div class="profile-avatar" aria-label="Squad Score avatar">
+                    <span>SS</span>
                 </div>
                 <div class="profile-summary">
-                    <h1 class="profile-name" data-profile-field="fullName">Georgia Walsh</h1>
-                    <p class="profile-tagline" data-profile-field="tagline">Joined Since: March 2024</p>
+                    <h1 class="profile-name" data-profile-field="fullName"></h1>
+                    <!-- <p class="profile-tagline" data-profile-field="tagline">Joined Since: March 2024</p> -->
                     <button class="profile-edit-button" type="button" data-profile-action="edit">Edit Profile</button>
                 </div>
             </header>
@@ -53,12 +53,12 @@
                         <div class="profile-field" data-profile-field-container>
                             <label class="profile-field-label" for="profile-first-name">First Name</label>
                             <span class="profile-field-value" data-profile-display>Georgia</span>
-                            <input class="profile-field-input" id="profile-first-name" name="firstName" value="Georgia" autocomplete="given-name" required>
+                            <input class="profile-field-input" id="profile-first-name" name="firstName" value="" autocomplete="given-name" required>
                         </div>
                         <div class="profile-field" data-profile-field-container>
                             <label class="profile-field-label" for="profile-last-name">Last Name</label>
                             <span class="profile-field-value" data-profile-display>Walsh</span>
-                            <input class="profile-field-input" id="profile-last-name" name="lastName" value="Walsh" autocomplete="family-name" required>
+                            <input class="profile-field-input" id="profile-last-name" name="lastName" value="" autocomplete="family-name" required>
                         </div>
                     </div>
                 </section>
@@ -72,17 +72,17 @@
                         <div class="profile-field" data-profile-field-container>
                             <label class="profile-field-label" for="profile-username">Username</label>
                             <span class="profile-field-value" data-profile-display>gwFirepit</span>
-                            <input class="profile-field-input" id="profile-username" name="username" value="gwFirepit" autocomplete="username" required>
+                            <input class="profile-field-input" id="profile-username" name="username" autocomplete="username" required>
                         </div>
                         <div class="profile-field" data-profile-field-container>
                             <label class="profile-field-label" for="profile-email">Email</label>
                             <span class="profile-field-value" data-profile-display>georgia.walsh@example.com</span>
-                            <input class="profile-field-input" id="profile-email" name="email" value="georgia.walsh@example.com" type="email" autocomplete="email" required>
+                            <input class="profile-field-input" id="profile-email" name="email" type="email" autocomplete="email" required>
                         </div>
                         <div class="profile-field" data-profile-field-container>
                             <label class="profile-field-label" for="profile-password">Password</label>
                             <span class="profile-field-value" data-profile-display>12345678</span>
-                            <input class="profile-field-input" id="profile-password" name="password" value="12345678" type="text" autocomplete="current-password" required>
+                            <input class="profile-field-input" id="profile-password" name="password" type="password" placeholder="*****" autocomplete="current-password" required>
 
                         </div>
                     </div>
