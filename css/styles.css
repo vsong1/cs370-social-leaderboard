@@ -1026,6 +1026,161 @@ body {
     gap: 1rem;
 }
 
+.leaderboard-add-score {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.leaderboard-add-score-button {
+    background: transparent;
+    border: 2px solid rgba(var(--accent-orange-rgb), 0.85);
+    color: var(--accent-orange);
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.85rem 1.75rem;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.leaderboard-add-score-button:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-orange);
+    color: var(--accent-orange);
+    box-shadow: 0 14px 32px rgba(var(--accent-orange-rgb), 0.28);
+    background-color: rgba(var(--accent-orange-rgb), 0.08);
+}
+
+.leaderboard-add-score-button:focus-visible {
+    outline: none;
+    border-color: var(--accent-orange);
+    color: var(--accent-orange);
+    box-shadow: 0 0 0 3px rgba(var(--accent-orange-rgb), 0.35);
+}
+
+.leaderboard-add-score-panel {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-panel);
+    box-shadow: var(--shadow-md);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.leaderboard-add-score-panel[hidden] {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+}
+
+.leaderboard-add-score-form {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.leaderboard-add-score-form .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.leaderboard-add-score-form label {
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(var(--text-primary-rgb), 0.7);
+}
+
+.leaderboard-add-score-form input {
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--input-border);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.leaderboard-add-score-form input:focus {
+    outline: none;
+    border-color: var(--accent-green);
+    box-shadow: var(--input-focus-ring);
+}
+
+.leaderboard-add-score-form .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.leaderboard-add-score-form .form-cancel,
+.leaderboard-add-score-form .form-submit {
+    padding: 0.75rem 1.6rem;
+    border-radius: 999px;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.leaderboard-add-score-form .form-cancel {
+    background: transparent;
+    border: 1px solid var(--border-soft);
+    color: rgba(var(--text-primary-rgb), 0.8);
+}
+
+.leaderboard-add-score-form .form-cancel:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.leaderboard-add-score-form .form-submit {
+    background: var(--gradient-orange-pink);
+    color: var(--text-inverse);
+}
+
+.leaderboard-add-score-form .form-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 32px rgba(var(--accent-orange-rgb), 0.28);
+}
+
+.leaderboard-add-score-form .form-error {
+    margin: -0.25rem 0 0;
+    color: var(--accent-pink);
+    font-size: 0.9rem;
+}
+
+.leaderboard-entry--user.is-new {
+    animation: leaderboardHighlight 1.2s ease;
+}
+
+@keyframes leaderboardHighlight {
+    0% {
+        box-shadow: 0 0 0 rgba(var(--accent-pink-rgb), 0);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(var(--accent-pink-rgb), 0.45);
+    }
+    100% {
+        box-shadow: 0 0 0 rgba(var(--accent-pink-rgb), 0);
+    }
+}
+
+
+
+/* .theme-light .leaderboard-add-score-button {
+    background: linear-gradient(135deg, rgba(var(--accent-orange-rgb), 0.22), rgba(255, 180, 107, 0.4));
+    color: var(--text-primary);
+} */
+
 .leaderboard-entry {
     background: var(--bg-elevated);
     border-radius: 16px;
@@ -1079,6 +1234,41 @@ body {
     min-width: 40px;
 }
 
+/* Reusable palette for user-added rows */
+.leaderboard-entry.user-style-green {
+    background: linear-gradient(135deg, rgba(var(--accent-green-strong-rgb), 0.3), rgba(var(--accent-green-rgb), 0.2));
+    border-color: rgba(var(--accent-green-rgb), 0.4);
+}
+
+.leaderboard-entry.user-style-orange {
+    background: linear-gradient(135deg, rgba(var(--accent-orange-rgb), 0.3), rgba(255, 165, 0, 0.2));
+    border-color: rgba(var(--accent-orange-rgb), 0.4);
+}
+
+.leaderboard-entry.user-style-purple {
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(168, 85, 247, 0.2));
+    border-color: rgba(147, 51, 234, 0.4);
+}
+
+.leaderboard-entry.user-style-azure {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(96, 165, 250, 0.2));
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.leaderboard-entry.user-style-navy {
+    background: linear-gradient(135deg, rgba(30, 64, 175, 0.3), rgba(59, 130, 246, 0.2));
+    border-color: rgba(30, 64, 175, 0.4);
+}
+
+
+.leaderboard-entry.rank-default {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-soft);
+}
+
+
+
+
 .leaderboard-entry .player-name {
     flex: 1;
     text-align: center;
@@ -1091,6 +1281,8 @@ body {
     min-width: 80px;
     text-align: right;
 }
+
+
 
 /* Responsive design for leaderboard */
 @media screen and (max-width: 768px) {

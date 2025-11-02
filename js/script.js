@@ -361,5 +361,168 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+(function initAddScorePanel() {
+    const trigger = document.querySelector('[data-add-score-trigger]');
+    const panel = document.querySelector('[data-add-score-panel]');
+    const form = document.getElementById('leaderboard-add-score-form');
+    const cancel = document.querySelector('[data-add-score-cancel]');
+    const errorField = document.querySelector('[data-add-score-error]');
+    const list = document.querySelector('.leaderboard-list');
+    const userPalette = ['user-style-green', 'user-style-orange', 'user-style-purple', 'user-style-azure', 'user-style-navy'];
+
+
+
+    if (!trigger || !panel || !form || !list) {
+        return;
+    }
+
+    const togglePanel = (shouldShow) => {
+        if (shouldShow) {
+            panel.hidden = false;
+            panel.style.opacity = '1';
+            panel.style.transform = 'translateY(0)';
+            form.querySelector('input')?.focus();
+        } else {
+            panel.hidden = true;
+            panel.style.opacity = '';
+            panel.style.transform = '';
+            form.reset();
+            hideError();
+        }
+        trigger.setAttribute('aria-expanded', String(shouldShow));
+    };
+
+    const showError = (message) => {
+        if (!errorField) return;
+        errorField.textContent = message;
+        errorField.hidden = false;
+    };
+
+    const hideError = () => {
+        if (!errorField) return;
+        errorField.textContent = '';
+        errorField.hidden = true;
+    };
+
+    trigger.addEventListener('click', () => {
+        const isHidden = panel.hidden;
+        togglePanel(isHidden);
+    });
+
+    cancel?.addEventListener('click', () => togglePanel(false));
+
+    const collectLeaderboardEntries = (listElement) => {
+        return Array.from(listElement.querySelectorAll('.leaderboard-entry')).map((entry) => {
+            const rankEl = entry.querySelector('.rank');
+            const pointsEl = entry.querySelector('.points');
+
+            const match = pointsEl?.textContent.match(/(-?\d+)/);
+            const score = match ? Number(match[1]) : 0;
+
+            return { element: entry, score, rankEl, pointsEl };
+        });
+    };
+
+    const buildLeaderboardEntry = ({ name, score, isNew = false }) => {
+        const entry = document.createElement('div');
+        entry.className = 'leaderboard-entry';
+        if (isNew) {
+            entry.classList.add('leaderboard-entry--user');
+            const randomClass = userPalette[Math.floor(Math.random() * userPalette.length)];
+            entry.dataset.userPalette = randomClass;
+            entry.classList.add(randomClass);
+        }
+    
+        entry.innerHTML = `
+            <span class="rank">#?</span>
+            <span class="player-name">${name}</span>
+            <span class="points">${score} points</span>
+        `;
+    
+        return {
+            element: entry,
+            score,
+            rankEl: entry.querySelector('.rank'),
+            pointsEl: entry.querySelector('.points')
+        };
+    };
+    
+    
+    
+
+    const rankClassFor = (rank) => {
+        if (rank <= 1) return 'rank-1';
+        if (rank === 2) return 'rank-2';
+        if (rank === 3) return 'rank-3';
+        return 'rank-default';
+    };
+    
+
+    
+const rebuildLeaderboard = (listElement, entries) => {
+    const sorted = entries.sort((a, b) => b.score - a.score);
+
+    let currentRank = 0;
+    let lastScore = null;
+    const fragment = document.createDocumentFragment();
+
+    sorted.forEach((entryObj, index) => {
+        if (entryObj.score !== lastScore) {
+            currentRank = index + 1;
+            lastScore = entryObj.score;
+        }
+    
+        entryObj.rankEl.textContent = `#${currentRank}`;
+        entryObj.pointsEl.textContent = `${entryObj.score} points`;
+    
+        if (entryObj.element.dataset.userPalette) {
+            entryObj.element.classList.remove('user-style-green', 'user-style-orange', 'user-style-purple', 'user-style-azure', 'user-style-navy');
+            entryObj.element.classList.add(entryObj.element.dataset.userPalette);
+        }
+    
+        fragment.appendChild(entryObj.element);
+    });
+    
+    
+
+    listElement.innerHTML = '';
+    listElement.appendChild(fragment);
+};
+
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        hideError();
+
+        const formData = new FormData(form);
+        const name = (formData.get('player_name') || '').trim();
+        const scoreValue = (formData.get('score') || '').trim();
+
+        if (!name || !scoreValue) {
+            showError('Please enter both player name and score.');
+            return;
+        }
+
+        const score = Number(scoreValue);
+   
+        const existingEntries = collectLeaderboardEntries(list);
+
+        const newEntry = buildLeaderboardEntry({
+            name,
+            score,
+            isNew: true
+        });
+
+        existingEntries.push(newEntry);
+
+        rebuildLeaderboard(list, existingEntries);
+
+        togglePanel(false);
+    });
+
+    
+
+})();
+
 
 

@@ -82,7 +82,31 @@
                     <span class="player-name">Jim</span>
                     <span class="points">1 point</span>
                 </div>
+            </div> 
+            <!-- Add Score to Leaderboard button -->
+            <div class="leaderboard-add-score">
+                <button class="leaderboard-add-score-button" type = "button" data-add-score-trigger> 
+                    Add Score to Leaderboard
+                </button>
             </div>
+            <div class="leaderboard-add-score-panel" data-add-score-panel hidden>
+                <form class="leaderboard-add-score-form" id="leaderboard-add-score-form" novalidate>
+                    <div class="form-field">
+                        <label for="add-score-name">Player Name<span aria-hidden="true">*</span></label>
+                        <input id="add-score-name" name="player_name" required maxlength="40" placeholder="Enter player name">
+                    </div>
+                    <div class="form-field">
+                        <label for="add-score-value">Score<span aria-hidden="true">*</span></label>
+                        <input id="add-score-value" name="score" type="number" required min="0" step="1" placeholder="Enter score">
+                    </div>
+                    <p class="form-error" role="alert" data-add-score-error hidden></p>
+                    <div class="form-actions">
+                        <button type="button" class="form-cancel" data-add-score-cancel>Cancel</button>
+                        <button type="submit" class="form-submit">Submit Score</button>
+                    </div>
+                </form>
+            </div>
+            
         </div>
     </main>
 
