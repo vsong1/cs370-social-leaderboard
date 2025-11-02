@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         greeting.addEventListener('mouseleave', function() {
-            this.style.color = '#ffffff';
+            this.style.color = 'var(--text-primary)';
         });
     }
     
