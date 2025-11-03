@@ -105,6 +105,38 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Leaderboard view, adding scores functionality
+(function leaderboardPersistence() {
+    const LB_STORAGE_PREFIX = 'leaderboard_entries:';
+
+    const getStorageKey = () => {
+        const title = document.querySelector('.leaderboard-title')?.textContent?.trim() || 'default';
+        return `${LB_STORAGE_PREFIX}${title.toLowerCase().replace(/\s+/g, '_')}`;
+    };
+
+    const readSavedEntries = () => {
+        try {
+            const raw = localStorage.getItem(getStorageKey());
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    };
+
+    const writeSavedEntries = (entries) => {
+        try {
+            localStorage.setItem(getStorageKey(), JSON.stringify(entries));
+        } catch {}
+    };
+
+    // Expose small helpers for this module scope
+    window._leaderboardStore = {
+        readSavedEntries,
+        writeSavedEntries
+    };
+})();
+
 (function initAddScorePanel() {
     const trigger = document.querySelector('[data-add-score-trigger]');
     const panel = document.querySelector('[data-add-score-panel]');
@@ -159,11 +191,13 @@ document.addEventListener('DOMContentLoaded', function () {
         return Array.from(listElement.querySelectorAll('.leaderboard-entry')).map((entry) => {
             const rankEl = entry.querySelector('.rank');
             const pointsEl = entry.querySelector('.points');
+            const nameEl = entry.querySelector('.player-name');
 
             const match = pointsEl?.textContent.match(/(-?\d+)/);
             const score = match ? Number(match[1]) : 0;
+            const name = nameEl?.textContent?.trim() || '';
 
-            return { element: entry, score, rankEl, pointsEl };
+            return { element: entry, score, rankEl, pointsEl, nameEl, name };
         });
     };
 
@@ -187,7 +221,9 @@ document.addEventListener('DOMContentLoaded', function () {
             element: entry,
             score,
             rankEl: entry.querySelector('.rank'),
-            pointsEl: entry.querySelector('.points')
+            pointsEl: entry.querySelector('.points'),
+            nameEl: entry.querySelector('.player-name'),
+            name
         };
     };
 
@@ -223,6 +259,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
         listElement.innerHTML = '';
         listElement.appendChild(fragment);
+
+        // Persist to localStorage whenever the list is rebuilt
+        try {
+            const serialized = Array.from(listElement.querySelectorAll('.leaderboard-entry')).map((entry) => {
+                const name = entry.querySelector('.player-name')?.textContent || '';
+                const pointsText = entry.querySelector('.points')?.textContent || '0';
+                const match = pointsText.match(/(-?\d+)/);
+                const points = match ? Number(match[1]) : 0;
+                return { name, points };
+            });
+            window._leaderboardStore?.writeSavedEntries(serialized);
+        } catch {}
     };
 
 
@@ -243,15 +291,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const existingEntries = collectLeaderboardEntries(list);
 
-        const newEntry = buildLeaderboardEntry({
-            name,
-            score,
-            isNew: true
-        });
+        // If the player already exists, update their score instead of adding a duplicate
+        const targetNameLower = name.toLowerCase();
+        const existing = existingEntries.find(e => (e.name || '').toLowerCase() === targetNameLower);
 
-        existingEntries.push(newEntry);
-
-        rebuildLeaderboard(list, existingEntries);
+        if (existing) {
+            existing.score = score;
+            if (existing.pointsEl) {
+                existing.pointsEl.textContent = `${score} points`;
+            }
+            // Normalize displayed name to the newly submitted case
+            if (existing.nameEl) {
+                existing.nameEl.textContent = name;
+                existing.name = name;
+            }
+            rebuildLeaderboard(list, existingEntries);
+        } else {
+            const newEntry = buildLeaderboardEntry({
+                name,
+                score,
+                isNew: true
+            });
+            existingEntries.push(newEntry);
+            rebuildLeaderboard(list, existingEntries);
+        }
 
         togglePanel(false);
     });
@@ -260,7 +323,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Leaderboard view, placeholder data
 function tempLeaderboard() {
-    const leaderboardData = [
+    const saved = window._leaderboardStore?.readSavedEntries?.() || [];
+    const leaderboardData = saved.length > 0 ? saved.map((s, idx) => ({
+        rank: idx + 1,
+        name: s.name,
+        points: Number(s.points) || 0
+    })) : [
         { rank: 1, name: 'Player123', points: 10 },
         { rank: 2, name: 'Georgia', points: 9 },
         { rank: 3, name: 'De', points: 7 },
@@ -287,6 +355,20 @@ function tempLeaderboard() {
         `;
         list.appendChild(div);
     });
+
+    // Ensure defaults are saved the first time
+    if (!saved.length) {
+        try {
+            const serialized = Array.from(list.querySelectorAll('.leaderboard-entry')).map((entry) => {
+                const name = entry.querySelector('.player-name')?.textContent || '';
+                const pointsText = entry.querySelector('.points')?.textContent || '0';
+                const match = pointsText.match(/(-?\d+)/);
+                const points = match ? Number(match[1]) : 0;
+                return { name, points };
+            });
+            window._leaderboardStore?.writeSavedEntries(serialized);
+        } catch {}
+    }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
