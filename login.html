@@ -61,22 +61,15 @@
     <script src="js/script.js"></script>
     <script>
         window.addEventListener('load', async function() {
-            // Wait for auth to initialize
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Check if already logged in
-            const user = await window.SquadScoreAuth.getUser();
-            if (user) {
-                console.log('Already logged in, redirecting...');
-                window.location.href = 'index.html';
-                return;
-            }
+            // Wait a moment for auth to initialize
+            await new Promise(resolve => setTimeout(resolve, 100));
             
             // Handle login form
             const loginForm = document.querySelector('.login-form');
             const loginButton = document.querySelector('.login-button');
             const errorMessage = document.getElementById('error-message');
-            
+
+            if (!loginForm) return;
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
@@ -101,7 +94,7 @@
                     console.log('Login successful! Redirecting...');
                     loginButton.textContent = 'Success!';
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = 'all-leaderboards.html';
                     }, 500);
                 }
             });
