@@ -10,15 +10,49 @@ const applyTheme = (theme) => {
 };
 
 const getInitialTheme = () => {
+    // First, check if there's already a theme applied to the document
+    // This preserves the theme across page navigations
+    if (root.dataset.theme === 'light' || root.classList.contains('theme-light')) {
+        const existingTheme = 'light';
+        // Save it to localStorage if not already saved
+        if (window.localStorage.getItem(THEME_STORAGE_KEY) !== existingTheme) {
+            window.localStorage.setItem(THEME_STORAGE_KEY, existingTheme);
+        }
+        return existingTheme;
+    }
+    
+    // Check if dark theme is explicitly set
+    if (root.dataset.theme === 'dark') {
+        const existingTheme = 'dark';
+        // Save it to localStorage if not already saved
+        if (window.localStorage.getItem(THEME_STORAGE_KEY) !== existingTheme) {
+            window.localStorage.setItem(THEME_STORAGE_KEY, existingTheme);
+        }
+        return existingTheme;
+    }
+    
+    // Check localStorage for saved preference
     const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
     if (storedTheme === 'light' || storedTheme === 'dark') {
         return storedTheme;
     }
-    const prefersLight = window.matchMedia?.('(prefers-color-scheme: light)')?.matches;
-    return prefersLight ? 'light' : 'dark';
+    // Default to dark theme (site default) instead of system preference
+    // This prevents unwanted theme changes on navigation or login
+    return 'dark';
 };
 
-let currentTheme = applyTheme(getInitialTheme());
+// Initialize theme - check current state first to avoid unnecessary changes
+let currentTheme;
+const detectedTheme = getInitialTheme();
+// Only apply if different from current state
+if ((detectedTheme === 'light' && !root.classList.contains('theme-light')) ||
+    (detectedTheme === 'dark' && root.classList.contains('theme-light'))) {
+    currentTheme = applyTheme(detectedTheme);
+} else {
+    // Use existing theme state
+    currentTheme = root.classList.contains('theme-light') ? 'light' : 'dark';
+    root.dataset.theme = currentTheme;
+}
 
 const updateToggleVisual = (toggle) => {
     if (!toggle) {
