@@ -28,6 +28,7 @@
     --accent-pink: #FF5BCE;
     --accent-pink-soft: #FF8E9B;
     --accent-pink-rgb: 255, 91, 206;
+    --accent-pink-soft-rgb: 255, 142, 155;
     --accent-blue: #699EFA;
     --accent-blue-rgb: 105, 158, 250;
     --border-strong: #2D3748;
@@ -41,9 +42,9 @@
     --glow-green: 0 0 0 3px rgba(var(--accent-green-rgb), 0.3);
     --scroll-track: rgba(23, 42, 58, 0.3);
     --scroll-thumb: rgba(var(--accent-green-rgb), 0.5);
-    --gradient-green: linear-gradient(135deg, var(--accent-green), var(--accent-green-strong));
-    --gradient-pink: linear-gradient(135deg, var(--accent-pink), var(--accent-pink-soft));
-    --gradient-orange-pink: linear-gradient(135deg, rgba(var(--accent-orange-rgb), 0.95), rgba(var(--accent-pink-rgb), 0.95));
+    --gradient-green: linear-gradient(135deg, rgba(var(--accent-green-rgb), 0.2), rgba(var(--accent-green-strong-rgb), 0.2));
+    --gradient-pink: linear-gradient(135deg, rgba(var(--accent-pink-rgb), 0.2), rgba(var(--accent-pink-soft-rgb), 0.2));
+    --gradient-orange: linear-gradient(135deg, rgba(var(--accent-orange-rgb), 0.2), rgba(var(--accent-orange-rgb), 0.2));
     --button-bg-primary: rgba(23, 42, 58, 0.9);
     --button-text-primary: var(--text-primary);
     --input-border: var(--border-soft);
@@ -88,9 +89,9 @@
     --glow-green: 0 0 0 3px rgba(59, 168, 107, 0.3);
     --scroll-track: rgba(26, 32, 44, 0.08);
     --scroll-thumb: rgba(215, 90, 165, 0.35);
-    --gradient-green: linear-gradient(135deg, #3BA86B, #58C48A);
-    --gradient-pink: linear-gradient(135deg, #D75AA5, #F6A0C8);
-    --gradient-orange-pink: linear-gradient(135deg, rgba(248, 136, 36, 0.92), rgba(215, 90, 165, 0.9));
+    --gradient-green: linear-gradient(135deg, #3BA86B33, #58C48A33);
+    --gradient-pink: linear-gradient(135deg, #D75AA533, #F6A0C833);
+    --gradient-orange: linear-gradient(135deg, rgba(248, 136, 36, 0.2), rgba(215, 90, 165, 0.2));
     --button-bg-primary: rgba(26, 32, 44, 0.08);
     --button-text-primary: var(--text-primary);
     --input-border: rgba(26, 32, 44, 0.22);
@@ -956,6 +957,9 @@ body {
     width: 100%;
     padding: 2rem;
     margin: 0 auto;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
 }
 
 .leaderboard-header {
@@ -965,8 +969,7 @@ body {
 .back-link {
     color: var(--text-primary);
     text-decoration: underline;
-    font-size: 1rem;
-    font-weight: 500;
+    font-weight: 700;
     margin-bottom: 2rem;
     display: inline-block;
     transition: color 0.3s ease;
@@ -986,7 +989,7 @@ body {
 
 .leaderboard-title {
     font-family: 'Orbitron', monospace;
-    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-size: clamp(2rem, 4vw, 4rem);
     font-weight: 900;
     color: var(--text-primary);
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
@@ -1003,8 +1006,8 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding: 1rem 2rem;
-    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    border-radius: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -1016,8 +1019,7 @@ body {
 
 .squad-chat-button:hover {
     background-color: rgba(var(--accent-pink-rgb), 0.1);
-    box-shadow: 0 0 30px rgba(var(--accent-pink-rgb), 0.3);
-    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(var(--accent-pink-rgb), 0.2);
 }
 
 .leaderboard-list {
@@ -1050,11 +1052,9 @@ body {
 }
 
 .leaderboard-add-score-button:hover {
-    transform: translateY(-2px);
     border-color: var(--accent-orange);
-    color: var(--accent-orange);
-    box-shadow: 0 14px 32px rgba(var(--accent-orange-rgb), 0.28);
-    background-color: rgba(var(--accent-orange-rgb), 0.08);
+    box-shadow: 0 0 30px rgba(var(--accent-orange-rgb), 0.2);
+    background-color: rgba(var(--accent-orange-rgb), 0.1);
 }
 
 .leaderboard-add-score-button:focus-visible {
@@ -1143,7 +1143,7 @@ body {
 }
 
 .leaderboard-add-score-form .form-submit {
-    background: var(--gradient-orange-pink);
+    background: var(--accent-orange);
     color: var(--text-inverse);
 }
 
@@ -1204,28 +1204,23 @@ body {
 
 /* Rank-specific colors matching the image */
 .leaderboard-entry.rank-1 {
-    background: linear-gradient(135deg, rgba(var(--accent-green-strong-rgb), 0.3), rgba(var(--accent-green-rgb), 0.2));
-    border-color: rgba(var(--accent-green-rgb), 0.4);
+    background: var(--gradient-green);
+    border: 2px solid rgba(var(--accent-green-rgb), 0.4);
 }
 
 .leaderboard-entry.rank-2 {
-    background: linear-gradient(135deg, rgba(var(--accent-orange-rgb), 0.3), rgba(255, 165, 0, 0.2));
-    border-color: rgba(var(--accent-orange-rgb), 0.4);
+    background: var(--gradient-orange);
+    border: 2px solid rgba(var(--accent-orange-rgb), 0.4);
 }
 
 .leaderboard-entry.rank-3 {
-    background: linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(168, 85, 247, 0.2));
-    border-color: rgba(147, 51, 234, 0.4);
+    background: var(--gradient-pink);
+    border: 2px solid rgba(var(--accent-pink-rgb), 0.4);
 }
 
-.leaderboard-entry.rank-5 {
+.leaderboard-entry.rank-default {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(96, 165, 250, 0.2));
-    border-color: rgba(59, 130, 246, 0.4);
-}
-
-.leaderboard-entry.rank-6 {
-    background: linear-gradient(135deg, rgba(30, 64, 175, 0.3), rgba(59, 130, 246, 0.2));
-    border-color: rgba(30, 64, 175, 0.4);
+    border: 1px solid var(--border-soft);
 }
 
 .leaderboard-entry .rank {
@@ -1236,38 +1231,24 @@ body {
 
 /* Reusable palette for user-added rows */
 .leaderboard-entry.user-style-green {
-    background: linear-gradient(135deg, rgba(var(--accent-green-strong-rgb), 0.3), rgba(var(--accent-green-rgb), 0.2));
-    border-color: rgba(var(--accent-green-rgb), 0.4);
+    background: var(--gradient-green);
+    border: 2px solid rgba(var(--accent-green-rgb), 0.4);
 }
 
 .leaderboard-entry.user-style-orange {
-    background: linear-gradient(135deg, rgba(var(--accent-orange-rgb), 0.3), rgba(255, 165, 0, 0.2));
-    border-color: rgba(var(--accent-orange-rgb), 0.4);
+    background: var(--gradient-orange);
+    border: 2px solid rgba(var(--accent-orange-rgb), 0.4);
 }
 
 .leaderboard-entry.user-style-purple {
-    background: linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(168, 85, 247, 0.2));
-    border-color: rgba(147, 51, 234, 0.4);
+    background: var(--gradient-pink);
+    border: 2px solid rgba(var(--accent-pink-rgb), 0.4);
 }
 
 .leaderboard-entry.user-style-azure {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(96, 165, 250, 0.2));
-    border-color: rgba(59, 130, 246, 0.4);
-}
-
-.leaderboard-entry.user-style-navy {
-    background: linear-gradient(135deg, rgba(30, 64, 175, 0.3), rgba(59, 130, 246, 0.2));
-    border-color: rgba(30, 64, 175, 0.4);
-}
-
-
-.leaderboard-entry.rank-default {
-    background: var(--bg-elevated);
     border: 1px solid var(--border-soft);
 }
-
-
-
 
 .leaderboard-entry .player-name {
     flex: 1;

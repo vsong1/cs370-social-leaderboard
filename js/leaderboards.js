@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const cancel = document.querySelector('[data-add-score-cancel]');
     const errorField = document.querySelector('[data-add-score-error]');
     const list = document.querySelector('.leaderboard-list');
-    const userPalette = ['user-style-green', 'user-style-orange', 'user-style-purple', 'user-style-azure', 'user-style-navy'];
+    const userPalette = ['rank-1', 'rank-2', 'rank-3', 'rank-default'];
 
 
 
@@ -191,9 +191,6 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     };
 
-
-
-
     const rankClassFor = (rank) => {
         if (rank <= 1) return 'rank-1';
         if (rank === 2) return 'rank-2';
@@ -201,12 +198,10 @@ document.addEventListener('DOMContentLoaded', function () {
         return 'rank-default';
     };
 
-
-
     const rebuildLeaderboard = (listElement, entries) => {
         const sorted = entries.sort((a, b) => b.score - a.score);
 
-        let currentRank = 0;
+        let currentRank = 1;
         let lastScore = null;
         const fragment = document.createDocumentFragment();
 
@@ -219,15 +214,12 @@ document.addEventListener('DOMContentLoaded', function () {
             entryObj.rankEl.textContent = `#${currentRank}`;
             entryObj.pointsEl.textContent = `${entryObj.score} points`;
 
-            if (entryObj.element.dataset.userPalette) {
-                entryObj.element.classList.remove('user-style-green', 'user-style-orange', 'user-style-purple', 'user-style-azure', 'user-style-navy');
-                entryObj.element.classList.add(entryObj.element.dataset.userPalette);
-            }
+            // update colors for all entries
+            entryObj.element.classList.remove('rank-1', 'rank-2', 'rank-3', 'rank-default');
+            entryObj.element.classList.add(rankClassFor(currentRank));
 
             fragment.appendChild(entryObj.element);
         });
-
-
 
         listElement.innerHTML = '';
         listElement.appendChild(fragment);
@@ -264,3 +256,42 @@ document.addEventListener('DOMContentLoaded', function () {
         togglePanel(false);
     });
 })();
+
+
+// Leaderboard view, placeholder data
+function tempLeaderboard() {
+    const leaderboardData = [
+        { rank: 1, name: 'Player123', points: 10 },
+        { rank: 2, name: 'Georgia', points: 9 },
+        { rank: 3, name: 'De', points: 7 },
+        { rank: 3, name: 'Kevin', points: 7 },
+        { rank: 5, name: 'Triangle', points: 3 },
+        { rank: 6, name: 'Jim', points: 1 }
+    ];
+
+    const list = document.querySelector('.leaderboard-list');
+    if (!list) return;
+
+    leaderboardData.forEach((entry) => {
+        const div = document.createElement('div');
+        let rankClass = 'rank-default';
+        if (entry.rank === 1) rankClass = 'rank-1';
+        else if (entry.rank === 2) rankClass = 'rank-2';
+        else if (entry.rank === 3) rankClass = 'rank-3';
+
+        div.className = `leaderboard-entry ${rankClass}`;
+        div.innerHTML = `
+            <span class="rank">#${entry.rank}</span>
+            <span class="player-name">${entry.name}</span>
+            <span class="points">${entry.points} points</span>
+        `;
+        list.appendChild(div);
+    });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    if (document.querySelector('.leaderboard-list')) {
+        tempLeaderboard();
+        initAddScorePanel();
+    }
+});

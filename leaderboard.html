@@ -46,43 +46,8 @@
                 </div>
             </div>
 
-            <div class="leaderboard-list">
-                <div class="leaderboard-entry rank-1">
-                    <span class="rank">#1</span>
-                    <span class="player-name">Player123</span>
-                    <span class="points">10 points</span>
-                </div>
-                
-                <div class="leaderboard-entry rank-2">
-                    <span class="rank">#2</span>
-                    <span class="player-name">Georgia (Me)</span>
-                    <span class="points">9 points</span>
-                </div>
-                
-                <div class="leaderboard-entry rank-3">
-                    <span class="rank">#3</span>
-                    <span class="player-name">De</span>
-                    <span class="points">7 points</span>
-                </div>
-                
-                <div class="leaderboard-entry rank-3">
-                    <span class="rank">#3</span>
-                    <span class="player-name">Kevin</span>
-                    <span class="points">7 points</span>
-                </div>
-                
-                <div class="leaderboard-entry rank-5">
-                    <span class="rank">#5</span>
-                    <span class="player-name">Triangle</span>
-                    <span class="points">3 points</span>
-                </div>
-                
-                <div class="leaderboard-entry rank-6">
-                    <span class="rank">#6</span>
-                    <span class="player-name">Jim</span>
-                    <span class="points">1 point</span>
-                </div>
-            </div> 
+            <div class="leaderboard-list"></div> 
+            
             <!-- Add Score to Leaderboard button -->
             <div class="leaderboard-add-score">
                 <button class="leaderboard-add-score-button" type = "button" data-add-score-trigger> 
@@ -92,11 +57,11 @@
             <div class="leaderboard-add-score-panel" data-add-score-panel hidden>
                 <form class="leaderboard-add-score-form" id="leaderboard-add-score-form" novalidate>
                     <div class="form-field">
-                        <label for="add-score-name">Player Name<span aria-hidden="true">*</span></label>
+                        <label for="add-score-name">Player Name</label>
                         <input id="add-score-name" name="player_name" required maxlength="40" placeholder="Enter player name">
                     </div>
                     <div class="form-field">
-                        <label for="add-score-value">Score<span aria-hidden="true">*</span></label>
+                        <label for="add-score-value">Score</label>
                         <input id="add-score-value" name="score" type="number" required min="0" step="1" placeholder="Enter score">
                     </div>
                     <p class="form-error" role="alert" data-add-score-error hidden></p>
