@@ -156,28 +156,106 @@
             // Load user profile from database
             const client = window.SquadScoreAuth.getClient();
             if (client) {
+                console.log('Fetching profile for user ID:', user.id);
+                
                 const { data: profile, error } = await client
                     .from('user')
                     .select('*')
                     .eq('id', user.id)
                     .single();
                 
+                console.log('Profile query result:', { profile, error });
+                
                 if (!error && profile) {
-                    console.log('Profile loaded:', profile);
+                    console.log('✅ Profile loaded from database:', profile);
                     
-                    // Update form with real data
-                    if (profile.first_name) document.getElementById('profile-first-name').value = profile.first_name;
-                    if (profile.last_name) document.getElementById('profile-last-name').value = profile.last_name;
-                    if (profile.username) document.getElementById('profile-username').value = profile.username;
-                    if (profile.email) document.getElementById('profile-email').value = profile.email;
+                    // Update ALL display spans directly
+                    const allDisplays = document.querySelectorAll('[data-profile-display]');
+                    console.log('Found display elements:', allDisplays.length);
                     
-                    // Update display
+                    allDisplays.forEach((display, index) => {
+                        const fieldContainer = display.closest('[data-profile-field-container]');
+                        if (!fieldContainer) return;
+                        
+                        const label = fieldContainer.querySelector('.profile-field-label');
+                        const labelText = label ? label.textContent.trim() : '';
+                        
+                        console.log(`Display ${index}: ${labelText}`);
+                        
+                        if (labelText === 'First Name') {
+                            display.textContent = profile.first_name || '--';
+                        } else if (labelText === 'Last Name') {
+                            display.textContent = profile.last_name || '--';
+                        } else if (labelText === 'Username') {
+                            display.textContent = profile.username || '--';
+                        } else if (labelText === 'Email') {
+                            display.textContent = profile.email || '--';
+                        } else if (labelText === 'Password') {
+                            display.textContent = '••••••••';
+                        }
+                    });
+                    
+                    // Update input fields
+                    const firstNameInput = document.getElementById('profile-first-name');
+                    const lastNameInput = document.getElementById('profile-last-name');
+                    const usernameInput = document.getElementById('profile-username');
+                    const emailInput = document.getElementById('profile-email');
+                    
+                    if (firstNameInput) firstNameInput.value = profile.first_name || '';
+                    if (lastNameInput) lastNameInput.value = profile.last_name || '';
+                    if (usernameInput) usernameInput.value = profile.username || '';
+                    if (emailInput) emailInput.value = profile.email || '';
+                    
+                    // Update header name and avatar
                     const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
-                    const displayName = fullName || profile.username || 'User';
+                    const displayName = fullName || profile.username || user.email;
                     const nameElement = document.querySelector('[data-profile-field="fullName"]');
                     if (nameElement) nameElement.textContent = displayName;
+                    
+                    const avatarElement = document.querySelector('.profile-avatar span');
+                    if (avatarElement) {
+                        const username = profile.username || user.email;
+                        const initials = username.substring(0, 2).toUpperCase();
+                        avatarElement.textContent = initials;
+                    }
                 } else {
-                    console.log('Profile not found or error:', error);
+                    console.warn('⚠️ Profile not in database, using auth data only');
+                    
+                    // Use auth user data as fallback
+                    const username = user.user_metadata?.username || user.email.split('@')[0];
+                    
+                    // Update what we can from auth
+                    const usernameInput = document.getElementById('profile-username');
+                    const emailInput = document.getElementById('profile-email');
+                    if (usernameInput) usernameInput.value = username;
+                    if (emailInput) emailInput.value = user.email;
+                    
+                    // Update displays
+                    allDisplays.forEach((display) => {
+                        const fieldContainer = display.closest('[data-profile-field-container]');
+                        if (!fieldContainer) return;
+                        
+                        const label = fieldContainer.querySelector('.profile-field-label');
+                        const labelText = label ? label.textContent.trim() : '';
+                        
+                        if (labelText === 'Username') {
+                            display.textContent = username;
+                        } else if (labelText === 'Email') {
+                            display.textContent = user.email;
+                        } else if (labelText === 'Password') {
+                            display.textContent = '••••••••';
+                        }
+                    });
+                    
+                    // Update header
+                    const nameElement = document.querySelector('[data-profile-field="fullName"]');
+                    if (nameElement) nameElement.textContent = username;
+                    
+                    const avatarElement = document.querySelector('.profile-avatar span');
+                    if (avatarElement) {
+                        const initials = username.substring(0, 2).toUpperCase();
+                        avatarElement.textContent = initials;
+                    }
                 }
             }
         });
