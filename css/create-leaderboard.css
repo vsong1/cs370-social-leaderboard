@@ -14,7 +14,7 @@
     border: 1px solid var(--border-strong);
     border-radius: 16px;
     padding: 2rem;
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--bx-shadow);
 }
 
 .create-leaderboard-header {

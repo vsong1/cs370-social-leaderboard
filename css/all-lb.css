@@ -74,7 +74,7 @@
 
 .leaderboard-info p {
     font-family: 'Inter', sans-serif;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     margin: 0.25rem 0;
     font-size: 0.9rem;
 }
@@ -219,7 +219,7 @@
 }
 
 .search-input::placeholder {
-    color: var(--text-secondary);
+    color: var(--text-primary);
     opacity: 0.7;
 }
 
@@ -228,7 +228,7 @@
     right: 0.5rem;
     background: transparent;
     border: none;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 4px;
