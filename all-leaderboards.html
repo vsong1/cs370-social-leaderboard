@@ -54,38 +54,7 @@
         </div>
         
         <div class="leaderboards-list" id="leaderboards-list">
-            <div class="leaderboard-card">
-                <div class="leaderboard-info">
-                    <h3 class="leaderboard-name">Foosball Friends</h3>
-                    <p class="leaderboard-game">Foosball</p>
-                    <p class="leaderboard-members">6 members</p>
-                </div>
-                <div class="leaderboard-actions">
-                    <button class="view-leaderboard-btn" onclick="window.location.href='leaderboard.html'">View</button>
-                </div>
-            </div>
-            
-            <div class="leaderboard-card">
-                <div class="leaderboard-info">
-                    <h3 class="leaderboard-name">Valorant Legends</h3>
-                    <p class="leaderboard-game">Valorant</p>
-                    <p class="leaderboard-members">5 members</p>
-                </div>
-                <div class="leaderboard-actions">
-                    <button class="view-leaderboard-btn" onclick="window.location.href='leaderboard.html'">View</button>
-                </div>
-            </div>
-            
-            <div class="leaderboard-card">
-                <div class="leaderboard-info">
-                    <h3 class="leaderboard-name">CS:GO Allstars</h3>
-                    <p class="leaderboard-game">Counter-Strike</p>
-                    <p class="leaderboard-members">8 members</p>
-                </div>
-                <div class="leaderboard-actions">
-                    <button class="view-leaderboard-btn" onclick="window.location.href='leaderboard.html'">View</button>
-                </div>
-            </div>
+            <!-- Leaderboards will be loaded from database here -->
         </div>
     </main>
     
@@ -93,6 +62,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Auth System -->
     <script src="supabase-auth.js"></script>
+    <!-- Database Helper Functions -->
+    <script src="js/database.js"></script>
     <!-- Site Scripts -->
     <script src="js/script.js"></script>
     <script src="js/theme-toggle.js"></script>

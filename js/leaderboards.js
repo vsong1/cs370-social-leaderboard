@@ -96,44 +96,190 @@ function clearLeaderboardSearch() {
     }
 }
 
+// Load and display leaderboards from database
+async function loadAllLeaderboards() {
+    const leaderboardsList = document.getElementById('leaderboards-list');
+    if (!leaderboardsList) return;
+    
+    // Show loading state
+    leaderboardsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: #888;">Loading leaderboards...</div>';
+    
+    // Wait for Supabase to initialize
+    let attempts = 0;
+    while (!window.Database && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+    }
+    
+    if (!window.Database) {
+        leaderboardsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: #ff6b6b;">Error: Database not loaded</div>';
+        return;
+    }
+    
+    // Get leaderboards from database
+    const { data: leaderboards, error } = await window.Database.getUserLeaderboards();
+    
+    if (error) {
+        console.error('❌ Error loading leaderboards:', error);
+        leaderboardsList.innerHTML = `<div style="text-align: center; padding: 2rem; color: #ff6b6b;">Error loading leaderboards: ${error.message}</div>`;
+        return;
+    }
+    
+    // Clear loading message
+    leaderboardsList.innerHTML = '';
+    
+    if (!leaderboards || leaderboards.length === 0) {
+        leaderboardsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: #888;">No leaderboards found. Create one to get started!</div>';
+        return;
+    }
+    
+    // Load member counts for each leaderboard (in parallel)
+    const leaderboardsWithCounts = await Promise.all(
+        leaderboards.map(async (lb) => {
+            const memberCount = await window.Database.getLeaderboardMemberCount(lb.id);
+            return { ...lb, memberCount };
+        })
+    );
+    
+    // Create cards for each leaderboard
+    leaderboardsWithCounts.forEach((leaderboard) => {
+        const card = document.createElement('div');
+        card.className = 'leaderboard-card';
+        
+        const memberText = leaderboard.memberCount === 1 
+            ? '1 member' 
+            : `${leaderboard.memberCount} members`;
+        
+        card.innerHTML = `
+            <div class="leaderboard-info">
+                <h3 class="leaderboard-name">${leaderboard.name || 'Unnamed Leaderboard'}</h3>
+                <p class="leaderboard-game">${leaderboard.game_name || 'Game'}</p>
+                <p class="leaderboard-members">${memberText}</p>
+            </div>
+            <div class="leaderboard-actions">
+                <button class="view-leaderboard-btn" onclick="window.location.href='leaderboard.html?id=${leaderboard.id}'">View</button>
+            </div>
+        `;
+        
+        leaderboardsList.appendChild(card);
+    });
+    
+    // Re-initialize search after loading (since we added new cards)
+    if (document.getElementById('leaderboard-search')) {
+        initializeLeaderboardSearch();
+    }
+}
+
 // Initialize search when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
     // Check if we're on the all-leaderboards page
     if (document.getElementById('leaderboard-search')) {
         initializeLeaderboardSearch();
+        // Load leaderboards from database
+        loadAllLeaderboards();
     }
 });
 
-// Leaderboard view, adding scores functionality
+// Leaderboard view, adding scores functionality - NOW USING SUPABASE!
 (function leaderboardPersistence() {
-    const LB_STORAGE_PREFIX = 'leaderboard_entries:';
-
-    const getStorageKey = () => {
-        const title = document.querySelector('.leaderboard-title')?.textContent?.trim() || 'default';
-        return `${LB_STORAGE_PREFIX}${title.toLowerCase().replace(/\s+/g, '_')}`;
+    // Get leaderboard ID from URL, data attribute, or by name
+    const getLeaderboardId = async () => {
+        // Try to get from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const idFromUrl = urlParams.get('id');
+        if (idFromUrl) return parseInt(idFromUrl);
+        
+        // Try to get from data attribute on the page
+        const leaderboardElement = document.querySelector('[data-leaderboard-id]');
+        if (leaderboardElement) {
+            return parseInt(leaderboardElement.getAttribute('data-leaderboard-id'));
+        }
+        
+        // Try to find by name from the page title
+        const titleElement = document.querySelector('.leaderboard-title');
+        if (titleElement && window.Database) {
+            const leaderboardName = titleElement.textContent?.trim();
+            if (leaderboardName) {
+                try {
+                    const { data, error } = await window.Database.findLeaderboardByName(leaderboardName);
+                    if (!error && data) {
+                        console.log('✅ Found leaderboard by name:', data.id);
+                        return data.id;
+                    }
+                } catch (err) {
+                    console.warn('⚠️ Could not find leaderboard by name:', err);
+                }
+            }
+        }
+        
+        // For now, return null - we'll need to create or find the leaderboard
+        // This is a temporary solution until we have proper leaderboard routing
+        return null;
     };
 
-    const readSavedEntries = () => {
+    // Read entries from Supabase
+    const readSavedEntries = async () => {
+        const leaderboardId = await getLeaderboardId();
+        
+        if (!leaderboardId) {
+            console.log('⚠️ No leaderboard ID found, returning empty array');
+            return [];
+        }
+        
+        if (!window.Database) {
+            console.error('❌ Database.js not loaded');
+            return [];
+        }
+        
         try {
-            const raw = localStorage.getItem(getStorageKey());
-            if (!raw) return [];
-            const parsed = JSON.parse(raw);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch {
+            const { data, error } = await window.Database.getSimpleLeaderboardEntries(leaderboardId);
+            
+            if (error) {
+                console.error('❌ Error loading leaderboard entries:', error);
+                return [];
+            }
+            
+            return data || [];
+        } catch (err) {
+            console.error('❌ Exception loading entries:', err);
             return [];
         }
     };
 
-    const writeSavedEntries = (entries) => {
+    // Write entries to Supabase (this will add a new entry)
+    const writeSavedEntry = async (name, score) => {
+        const leaderboardId = await getLeaderboardId();
+        
+        if (!leaderboardId) {
+            console.error('❌ Cannot save: No leaderboard ID found');
+            return { success: false, error: 'No leaderboard ID. Please make sure the leaderboard exists in the database.' };
+        }
+        
+        if (!window.Database) {
+            console.error('❌ Database.js not loaded');
+            return { success: false, error: 'Database not loaded' };
+        }
+        
         try {
-            localStorage.setItem(getStorageKey(), JSON.stringify(entries));
-        } catch {}
+            const { data, error } = await window.Database.addLeaderboardEntry(leaderboardId, name, score);
+            
+            if (error) {
+                console.error('❌ Error saving entry:', error);
+                return { success: false, error };
+            }
+            
+            return { success: true, data };
+        } catch (err) {
+            console.error('❌ Exception saving entry:', err);
+            return { success: false, error: err.message };
+        }
     };
 
-    // Expose small helpers for this module scope
+    // Expose helpers for this module scope
     window._leaderboardStore = {
         readSavedEntries,
-        writeSavedEntries
+        writeSavedEntry,
+        getLeaderboardId
     };
 })();
 
@@ -260,21 +406,12 @@ document.addEventListener('DOMContentLoaded', function () {
         listElement.innerHTML = '';
         listElement.appendChild(fragment);
 
-        // Persist to localStorage whenever the list is rebuilt
-        try {
-            const serialized = Array.from(listElement.querySelectorAll('.leaderboard-entry')).map((entry) => {
-                const name = entry.querySelector('.player-name')?.textContent || '';
-                const pointsText = entry.querySelector('.points')?.textContent || '0';
-                const match = pointsText.match(/(-?\d+)/);
-                const points = match ? Number(match[1]) : 0;
-                return { name, points };
-            });
-            window._leaderboardStore?.writeSavedEntries(serialized);
-        } catch {}
+        // Note: We no longer persist to localStorage here
+        // Entries are saved individually when added via the form
     };
 
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
         event.preventDefault();
         hideError();
 
@@ -289,23 +426,45 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const score = Number(scoreValue);
 
-        const existingEntries = collectLeaderboardEntries(list);
+        // Show loading state
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton?.textContent;
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Saving...';
+        }
 
-        // If the player already exists, update their score instead of adding a duplicate
+        // Save to Supabase
+        const result = await window._leaderboardStore?.writeSavedEntry(name, score);
+        
+        if (!result || !result.success) {
+            showError(result?.error?.message || 'Failed to save score. Please try again.');
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+            return;
+        }
+
+        // Reload entries from database to get updated scores
+        const updatedEntries = await window._leaderboardStore?.readSavedEntries() || [];
+        
+        // Convert to format expected by rebuildLeaderboard
+        const existingEntries = collectLeaderboardEntries(list);
+        
+        // Update or add the entry
         const targetNameLower = name.toLowerCase();
         const existing = existingEntries.find(e => (e.name || '').toLowerCase() === targetNameLower);
-
+        
         if (existing) {
             existing.score = score;
             if (existing.pointsEl) {
                 existing.pointsEl.textContent = `${score} points`;
             }
-            // Normalize displayed name to the newly submitted case
             if (existing.nameEl) {
                 existing.nameEl.textContent = name;
                 existing.name = name;
             }
-            rebuildLeaderboard(list, existingEntries);
         } else {
             const newEntry = buildLeaderboardEntry({
                 name,
@@ -313,32 +472,54 @@ document.addEventListener('DOMContentLoaded', function () {
                 isNew: true
             });
             existingEntries.push(newEntry);
-            rebuildLeaderboard(list, existingEntries);
         }
+        
+        rebuildLeaderboard(list, existingEntries);
 
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+        }
+        
         togglePanel(false);
     });
 })();
 
 
-// Leaderboard view, placeholder data
-function tempLeaderboard() {
-    const saved = window._leaderboardStore?.readSavedEntries?.() || [];
+// Leaderboard view, load data from Supabase
+async function loadLeaderboard() {
+    const list = document.querySelector('.leaderboard-list');
+    if (!list) return;
+
+    // Show loading state
+    list.innerHTML = '<div style="text-align: center; padding: 2rem; color: #888;">Loading leaderboard...</div>';
+
+    // Wait a bit for Supabase to initialize
+    let attempts = 0;
+    while (!window.Database && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+    }
+
+    // Load entries from Supabase
+    const saved = await window._leaderboardStore?.readSavedEntries() || [];
+    
+    // If no entries found, show placeholder data (but don't save it)
     const leaderboardData = saved.length > 0 ? saved.map((s, idx) => ({
         rank: idx + 1,
         name: s.name,
-        points: Number(s.points) || 0
+        points: Number(s.points || 0)
     })) : [
         { rank: 1, name: 'Player123', points: 10 },
         { rank: 2, name: 'Georgia', points: 9 },
         { rank: 3, name: 'De', points: 7 },
-        { rank: 3, name: 'Kevin', points: 7 },
+        { rank: 4, name: 'Kevin', points: 7 },
         { rank: 5, name: 'Triangle', points: 3 },
         { rank: 6, name: 'Jim', points: 1 }
     ];
 
-    const list = document.querySelector('.leaderboard-list');
-    if (!list) return;
+    // Clear loading message
+    list.innerHTML = '';
 
     leaderboardData.forEach((entry) => {
         const div = document.createElement('div');
@@ -355,25 +536,11 @@ function tempLeaderboard() {
         `;
         list.appendChild(div);
     });
-
-    // Ensure defaults are saved the first time
-    if (!saved.length) {
-        try {
-            const serialized = Array.from(list.querySelectorAll('.leaderboard-entry')).map((entry) => {
-                const name = entry.querySelector('.player-name')?.textContent || '';
-                const pointsText = entry.querySelector('.points')?.textContent || '0';
-                const match = pointsText.match(/(-?\d+)/);
-                const points = match ? Number(match[1]) : 0;
-                return { name, points };
-            });
-            window._leaderboardStore?.writeSavedEntries(serialized);
-        } catch {}
-    }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
     if (document.querySelector('.leaderboard-list')) {
-        tempLeaderboard();
+        await loadLeaderboard();
         initAddScorePanel();
     }
 });
