@@ -156,7 +156,7 @@
 .form-cancel:hover,
 .form-submit:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--bx-shadow);
 }
 
 .form-cancel:disabled,
@@ -194,9 +194,9 @@
     gap: 0.75rem;
     padding: 1.75rem;
     border-radius: 20px;
-    background: var(--bg-overlay);
+    background: var(--bg-elevated);
     border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--bx-shadow);
 }
 
 .squad-card-header {
