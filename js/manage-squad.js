@@ -8,14 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Mock data (TODO: replace with Supabase fetch)
     const squadData = {
-        name: "Valorant Eagles",
-        visibility: "public",
+        name: "Top Squad",
+        visibility: "private",
         description: "Ranked climbs and fun weekend matches!!",
-        members: ["Georgia (You)", "Alex", "Sam", "Taylor"]
+        members: ["Vivian (You)", "Georgia", "Sam", "Kevin", "Triangle", "De", "Gus", "Player123", "Jess", "Test"]
     };
 
     // Populate form
     document.getElementById('squad-name').value = squadData.name;
+    document.getElementById('visibility').value = squadData.visibility;
     document.getElementById('squad-description').value = squadData.description;
 
     // Populate members
@@ -37,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement("li");
             li.classList.add("member-item");
             li.innerHTML = `
-                <span class="member-name">${newMember}</span>
+                <span class="member-name">${newMember} (pending)</span>
                 <button type="button" class="remove-member-btn">Remove</button>
             `;
             memberList.appendChild(li);
