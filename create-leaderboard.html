@@ -15,7 +15,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-greeting">
-                <span>Ready to compete, Georgia!</span>
+                <span id="user-greeting-name">Ready to compete!</span>
             </div>
 
             <!-- Hamburger button -->
@@ -123,22 +123,16 @@
         </div>
     </main>
 
-    <!-- Auth0 SDK -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
-    
-    <!-- Auth0 Configuration -->
-    <script src="auth-config.js"></script>
-    
-    <!-- Auth0 Authentication Module -->
-    <script type="module" src="auth.js"></script>
-    
+    <!-- Supabase Auth + Database -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-auth.js"></script>
+    <script src="js/database.js"></script>
+
     <!-- Upstream site scripts -->
     <script src="js/script.js"></script>
     <script src="js/create-leaderboard.js"></script>
     <script src="js/theme-toggle.js"></script>
     <script src="js/leaderboards.js"></script>
-
-    <!-- Hamburger menu for navbar -->
     <script src="js/burger-menu.js"></script>
 
 </body>

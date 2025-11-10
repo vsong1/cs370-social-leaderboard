@@ -9,7 +9,50 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // Global state
 let supabase = null;
 let currentUser = null;
+let currentProfile = null;
+let profileFetchPromise = null;
 let isInitialized = false;
+
+function clearProfileCache() {
+    currentProfile = null;
+    profileFetchPromise = null;
+}
+
+async function fetchUserProfile() {
+    if (!supabase || !currentUser) {
+        return null;
+    }
+
+    if (currentProfile && currentProfile.id === currentUser.id) {
+        return currentProfile;
+    }
+
+    if (profileFetchPromise) {
+        return profileFetchPromise;
+    }
+
+    profileFetchPromise = supabase
+        .from('user')
+        .select('id, first_name, last_name, username, email')
+        .eq('id', currentUser.id)
+        .single()
+        .then(({ data, error }) => {
+            profileFetchPromise = null;
+            if (error) {
+                console.warn('⚠️ Unable to fetch user profile for greeting:', error.message);
+                return null;
+            }
+            currentProfile = data;
+            return data;
+        })
+        .catch((error) => {
+            profileFetchPromise = null;
+            console.error('❌ Unexpected profile fetch error:', error);
+            return null;
+        });
+
+    return profileFetchPromise;
+}
 
 // Initialize Supabase client
 async function init() {
@@ -41,6 +84,7 @@ async function init() {
     supabase.auth.onAuthStateChange((event, session) => {
         console.log('🔄 Auth event:', event);
         currentUser = session?.user || null;
+        clearProfileCache();
         updatePageUI();
     });
     
@@ -49,7 +93,7 @@ async function init() {
 }
 
 // Update UI based on auth state
-function updatePageUI() {
+async function updatePageUI() {
     const greeting = document.querySelector('.nav-greeting span');
     const navLinks = document.querySelector('.nav-links');
     const navAnchors = navLinks ? Array.from(navLinks.querySelectorAll('a')) : [];
@@ -62,14 +106,21 @@ function updatePageUI() {
     }
     if (currentUser) {
         // User is logged in
-        const username = currentUser.user_metadata?.username || 
-                        currentUser.email?.split('@')[0] || 
-                        'User';
-        
+        const profile = await fetchUserProfile();
+
+        const firstName = profile?.first_name?.trim() ||
+                          currentUser.user_metadata?.first_name?.trim();
+
+        const greetingName = firstName ||
+                             currentUser.user_metadata?.username ||
+                             profile?.username ||
+                             currentUser.email?.split('@')[0] ||
+                             'Player';
+
         body.setAttribute('data-auth-state', 'signed-in');
         
         if (greeting) {
-            greeting.textContent = `Hi, ${username}!`;
+            greeting.textContent = `Ready to compete, ${greetingName}!`;
         }
         if (navLinks) {
             navLinks.setAttribute('aria-hidden', 'false');
@@ -92,7 +143,7 @@ function updatePageUI() {
             hamburger.setAttribute('aria-expanded', 'false');
         }
         
-        console.log('✅ UI updated for logged in user:', username);
+        console.log('✅ UI updated for logged in user:', greetingName);
     } else {
         // User is logged out
         body.removeAttribute('data-auth-state');
@@ -162,6 +213,7 @@ window.SquadScoreAuth = {
         } else {
             console.log('✅ Sign in successful!');
             currentUser = data.user;
+            clearProfileCache();
             updatePageUI();
         }
         
@@ -180,6 +232,7 @@ window.SquadScoreAuth = {
         localStorage.clear();
         sessionStorage.clear();
         currentUser = null;
+        clearProfileCache();
         
         if (error) {
             console.error('❌ Sign out error:', error.message);
@@ -196,7 +249,15 @@ window.SquadScoreAuth = {
         if (!supabase) await init();
         
         const { data: { user } } = await supabase.auth.getUser();
+        const previousProfileId = currentProfile?.id;
         currentUser = user;
+
+        if (!user) {
+            clearProfileCache();
+        } else if (previousProfileId && previousProfileId !== user.id) {
+            clearProfileCache();
+        }
+
         return user;
     },
     
@@ -208,6 +269,16 @@ window.SquadScoreAuth = {
     // Get supabase client for queries
     getClient() {
         return supabase;
+    },
+
+    // Allow other scripts to refresh or clear the cached profile
+    invalidateProfileCache() {
+        clearProfileCache();
+    },
+
+    async getCachedProfile() {
+        if (!supabase) await init();
+        return fetchUserProfile();
     }
 };
 

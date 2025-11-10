@@ -14,7 +14,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-greeting">
-                <span>Ready to compete, Georgia!</span>
+                <span>Ready to compete!</span>
             </div>
             <!-- Hamburger button -->
             <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false">
@@ -169,6 +169,7 @@
     <script src="js/burger-menu.js"></script>
     <script>
         window.addEventListener('load', async function() {
+            const greeting = document.querySelector('.nav-greeting span');
             // Wait for auth to initialize
             await new Promise(resolve => setTimeout(resolve, 1000));
             
@@ -222,30 +223,27 @@
                 
                 console.log('Profile query result:', { profile, error });
                 
-                if (!error && profile) {
-                    console.log('✅ Profile loaded from database:', profile);
+                function updateProfileDisplays(profileData) {
+                    if (!profileData) return;
                     
                     // Update ALL display spans directly
                     const allDisplays = document.querySelectorAll('[data-profile-display]');
-                    console.log('Found display elements:', allDisplays.length);
                     
-                    allDisplays.forEach((display, index) => {
+                    allDisplays.forEach((display) => {
                         const fieldContainer = display.closest('[data-profile-field-container]');
                         if (!fieldContainer) return;
                         
                         const label = fieldContainer.querySelector('.profile-field-label');
                         const labelText = label ? label.textContent.trim() : '';
                         
-                        console.log(`Display ${index}: ${labelText}`);
-                        
                         if (labelText === 'First Name') {
-                            display.textContent = profile.first_name || '--';
+                            display.textContent = profileData.first_name || '--';
                         } else if (labelText === 'Last Name') {
-                            display.textContent = profile.last_name || '--';
+                            display.textContent = profileData.last_name || '--';
                         } else if (labelText === 'Username') {
-                            display.textContent = profile.username || '--';
+                            display.textContent = profileData.username || '--';
                         } else if (labelText === 'Email') {
-                            display.textContent = profile.email || '--';
+                            display.textContent = profileData.email || '--';
                         } else if (labelText === 'Password') {
                             display.textContent = '••••••••';
                         }
@@ -257,45 +255,61 @@
                     const usernameInput = document.getElementById('profile-username');
                     const emailInput = document.getElementById('profile-email');
                     
-                    if (firstNameInput) firstNameInput.value = profile.first_name || '';
-                    if (lastNameInput) lastNameInput.value = profile.last_name || '';
-                    if (usernameInput) usernameInput.value = profile.username || '';
-                    if (emailInput) emailInput.value = profile.email || '';
+                    if (firstNameInput) firstNameInput.value = profileData.first_name || '';
+                    if (lastNameInput) lastNameInput.value = profileData.last_name || '';
+                    if (usernameInput) usernameInput.value = profileData.username || '';
+                    if (emailInput) emailInput.value = profileData.email || '';
                     
                     // Update header name and avatar
-                    const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
-                    const displayName = fullName || profile.username || user.email;
+                    const fullName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
+                    const displayName = fullName ||
+                                        user.user_metadata?.first_name ||
+                                        profileData.username ||
+                                        user.user_metadata?.username ||
+                                        user.email.split('@')[0] ||
+                                        user.email;
                     const nameElement = document.querySelector('[data-profile-field="fullName"]');
                     if (nameElement) nameElement.textContent = displayName;
                     
                     const avatarElement = document.querySelector('[data-profile-avatar-initials]');
                     if (avatarElement) {
-                        const username = profile.username || user.email;
-                        const initials = username.substring(0, 2).toUpperCase();
+                        const usernameText = profileData.username || user.email;
+                        const initials = usernameText.substring(0, 2).toUpperCase();
                         avatarElement.textContent = initials;
                     }
+                }
+                
+                if (!error && profile) {
+                    console.log('✅ Profile loaded from database:', profile);
+                    updateProfileDisplays(profile);
                 } else {
                     console.warn('⚠️ Profile not in database, using auth data only');
                     
                     // Use auth user data as fallback
-                    const username = user.user_metadata?.username || user.email.split('@')[0];
+                    const fallbackFirstName = (user.user_metadata?.first_name || '').trim();
+                    const fallbackUsername = user.user_metadata?.username || user.email.split('@')[0];
                     
                     // Update what we can from auth
                     const usernameInput = document.getElementById('profile-username');
                     const emailInput = document.getElementById('profile-email');
-                    if (usernameInput) usernameInput.value = username;
+                    if (usernameInput) usernameInput.value = fallbackUsername;
                     if (emailInput) emailInput.value = user.email;
                     
                     // Update displays
-                    allDisplays.forEach((display) => {
+                    const fallbackDisplays = document.querySelectorAll('[data-profile-display]');
+                    fallbackDisplays.forEach((display) => {
                         const fieldContainer = display.closest('[data-profile-field-container]');
                         if (!fieldContainer) return;
                         
                         const label = fieldContainer.querySelector('.profile-field-label');
                         const labelText = label ? label.textContent.trim() : '';
                         
-                        if (labelText === 'Username') {
-                            display.textContent = username;
+                        if (labelText === 'First Name') {
+                            display.textContent = fallbackFirstName || '--';
+                        } else if (labelText === 'Last Name') {
+                            display.textContent = '--';
+                        } else if (labelText === 'Username') {
+                            display.textContent = fallbackUsername;
                         } else if (labelText === 'Email') {
                             display.textContent = user.email;
                         } else if (labelText === 'Password') {
@@ -305,13 +319,82 @@
                     
                     // Update header
                     const nameElement = document.querySelector('[data-profile-field="fullName"]');
-                    if (nameElement) nameElement.textContent = username;
+                    if (nameElement) nameElement.textContent = fallbackFirstName || fallbackUsername;
                     
                     const avatarElement = document.querySelector('[data-profile-avatar-initials]');
                     if (avatarElement) {
-                        const initials = username.substring(0, 2).toUpperCase();
+                        const initialsSource = (fallbackFirstName || fallbackUsername || 'SS').toUpperCase();
+                        const initials = initialsSource.substring(0, 2);
                         avatarElement.textContent = initials;
                     }
+
+                    if (greeting) {
+                        const preferredGreeting = fallbackFirstName || fallbackUsername || 'Player';
+                        greeting.textContent = `Ready to compete, ${preferredGreeting}!`;
+                    }
+                }
+                
+                // Handle profile form submission to update first/last name
+                const profileForm = document.getElementById('profile-form');
+                if (profileForm) {
+                    profileForm.addEventListener('submit', async (event) => {
+                        event.preventDefault();
+                        
+                        const firstNameInput = document.getElementById('profile-first-name');
+                        const lastNameInput = document.getElementById('profile-last-name');
+                        
+                        const updates = {
+                            first_name: firstNameInput ? firstNameInput.value.trim() || null : null,
+                            last_name: lastNameInput ? lastNameInput.value.trim() || null : null,
+                            updated_at: new Date().toISOString()
+                        };
+                        
+                        console.log('🔄 Updating profile names with:', updates);
+                        
+                        const { error: updateError } = await client
+                            .from('user')
+                            .update(updates)
+                            .eq('id', user.id);
+                        
+                        if (updateError) {
+                            console.error('❌ Failed to update profile names:', updateError);
+                            alert('Unable to update your profile right now. Please try again.');
+                            return;
+                        }
+                        
+                        console.log('✅ Profile names updated. Refreshing view...');
+                        
+                        const { data: refreshedProfile, error: refreshError } = await client
+                            .from('user')
+                            .select('*')
+                            .eq('id', user.id)
+                            .single();
+                        
+                        if (!refreshError && refreshedProfile) {
+                            updateProfileDisplays(refreshedProfile);
+                            
+                            if (window.SquadScoreAuth && window.SquadScoreAuth.invalidateProfileCache) {
+                                window.SquadScoreAuth.invalidateProfileCache();
+                                if (window.SquadScoreAuth.getCachedProfile) {
+                                    window.SquadScoreAuth.getCachedProfile();
+                                }
+                            }
+                            
+                            const greetingName = refreshedProfile.first_name ||
+                                                 user.user_metadata?.first_name ||
+                                                 user.user_metadata?.username ||
+                                                 refreshedProfile.username ||
+                                                 user.email.split('@')[0] ||
+                                                 'Player';
+                            if (greeting) {
+                                greeting.textContent = `Ready to compete, ${greetingName}!`;
+                            }
+                            
+                            alert('Profile updated successfully.');
+                        } else {
+                            console.warn('⚠️ Updated names saved but could not refresh profile view:', refreshError);
+                        }
+                    });
                 }
             }
         });

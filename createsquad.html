@@ -16,7 +16,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-greeting">
-                <span>Ready to compete, Georgia!</span>
+                <span id="user-greeting-name">Ready to compete!</span>
             </div>
 
             <!-- Hamburger button -->
@@ -89,12 +89,15 @@
         </section>
     </main>
     
+    <!-- Supabase Auth + Database -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-auth.js"></script>
+    <script src="js/database.js"></script>
+
     <!-- Upstream site scripts -->
     <script src="js/script.js"></script>
     <script type="module" src="js/squads.js"></script>
     <script src="js/theme-toggle.js"></script>
-
-    <!-- Hamburger menu for navbar -->
     <script src="js/burger-menu.js"></script>
 
 </body>
