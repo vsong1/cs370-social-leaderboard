@@ -1,0 +1,348 @@
+.squadlist-content {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    padding: 1.25rem;
+}
+
+/* Header */
+.squad-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.squad-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    margin: 0;
+}
+
+.createsquad-toggle {
+    color: var(--text-primary);
+    background: transparent;
+    text-decoration: underline;
+    border: none;
+    cursor: pointer;
+    align-self: stretch;
+}
+
+/***********************************************************
+ * FORM PANEL
+ ***********************************************************/
+.form-field {
+    margin-bottom: 1rem;
+}
+
+.form-field label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+}
+
+.form-field input,
+.form-field textarea,
+.form-field select {
+    width: 100%;
+    padding: 0.7rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: var(--bg-soft);
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.form-submit,
+.form-cancel {
+    border: none;
+    border-radius: 6px;
+    padding: 0.8rem 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.form-submit {
+    background: var(--accent-pink);
+    color: var(--text-primary);
+}
+
+.form-cancel {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.form-cancel:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/***********************************************************
+ * MEMBER MANAGEMENT
+ ***********************************************************/
+.member-management {
+    margin-top: 1.75rem;
+}
+
+.member-management h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+}
+
+.member-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+}
+
+.member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-soft);
+    padding: 0.6rem 0.8rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.member-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.remove-member-btn {
+    background: #ff4d4d;
+    color: var(--text-primary);
+    border: none;
+    border-radius: 6px;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+
+.remove-member-btn:hover:not([disabled]) {
+    background: #e63939;
+}
+
+.remove-member-btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.add-member {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+}
+
+.add-member input {
+    width: 70%;
+    padding: 0.6rem;
+    border-radius: 6px;
+    border: 5px solid rgba(255, 255, 255, 0.2);
+    background: var(--bg-soft);
+    color: var(--text-primary);
+}
+
+.add-member .pink-btn {
+    width: 30%;
+    cursor: pointer;
+}
+
+/***********************************************************
+ * DELETE SQUAD
+ ***********************************************************/
+.delete-section {
+    border-top: 2px solid var(--text-inverse);
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+}
+
+.delete-section h3 {
+    font-family: 'Orbitron', sans-serif;
+    color: #ff4d4d;
+    margin-bottom: 0.5rem;
+}
+
+.delete-section p {
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.deletesquad-btn {
+    background: #ff4d4d;
+    color: var(--text-primary);
+    border: none;
+    border-radius: 6px;
+    padding: 0.8rem 1.25rem;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+}
+
+.deletesquad-btn:hover {
+    background: #e63939;
+}
+
+/***********************************************************
+ * DELETE CONFIRMATION MODAL
+ ***********************************************************/
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+}
+
+.modal.active {
+    display: flex;
+    opacity: 1;
+    pointer-events: all;
+    animation: fadeIn 0.25s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: var(--modal-backdrop);
+    color: var(--text-primary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h2 {
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 0.75rem;
+    color: #ff4d4d;
+    font-size: 1.3rem;
+}
+
+.modal-content p {
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+    line-height: 1.4;
+    font-size: 0.95rem;
+}
+
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.modal .form-cancel,
+.modal .red-btn {
+    border-radius: 6px;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border: none;
+    cursor: pointer;
+}
+
+.modal .form-cancel {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal .form-cancel:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.modal .red-btn {
+    background: #ff4d4d;
+    color: var(--text-primary);
+}
+
+.modal .red-btn:hover {
+    background: #e63939;
+}
+
+@media (min-width: 768px) {
+    .squad-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .createsquad-toggle {
+        align-self: center;
+        width: auto;
+    }
+
+    .form-actions {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+
+    .add-member {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .add-member input {
+        flex: 1;
+    }
+
+    .modal-actions {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
+@media (min-width: 1024px) {
+    .squad-title {
+        font-size: 2rem;
+    }
+
+    .member-management h2 {
+        font-size: 1.4rem;
+    }
+
+    .delete-section {
+        margin-top: 3rem;
+        padding-top: 2rem;
+    }
+
+    .deletesquad-btn {
+        width: auto;
+    }
+
+    .modal-content {
+        padding: 2rem;
+        max-width: 420px;
+    }
+}

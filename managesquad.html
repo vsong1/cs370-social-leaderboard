@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Squads - Squad Score</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/burger-menu.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/all-squads.css">
+    <link rel="stylesheet" href="css/manage-squad.css">
+
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-greeting">
+                <span>Ready to compete, Georgia!</span>
+            </div>
+
+            <!-- Hamburger button -->
+            <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="all-leaderboards.html" class="nav-link">Leaderboards</a>
+                <a href="all-squads.html" class="nav-link active">My Squads</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="squadlist-content">
+        <div id="squadlist-container">
+            <div id="squadlist-header">
+                <h1>Manage Squad</h1>
+                <button class="createsquad-toggle" type="button" onclick="window.location.href='all-squads.html'">
+                    &lt; Back to My Squads
+                </button>
+            </div>
+
+            <section class="create-squad-panel" data-panel>
+                <form id="manage-squad-form" novalidate>
+                    <div class="form-field">
+                        <label for="squad-name">Squad Name<span aria-hidden="true">*</span></label>
+                        <input id="squad-name" name="squad_name" required maxlength="40" placeholder="e.g., Valorant Eagles">
+                    </div>
+
+                    <!-- <div class="form-field">
+                        <label for="visibility">Visibility</label>
+                        <select id="visibility" name="visibility">
+                            <option value="public">Public</option>
+                            <option value="private">Private</option>
+                        </select>
+                    </div> -->
+
+                    <div class="form-field">
+                        <label for="squad-description">Description</label>
+                        <textarea id="squad-description" name="description" maxlength="256" 
+                            placeholder="Describe your squad’s goals or play style"></textarea>
+                    </div>
+
+                    <section class="member-management">
+                        <h2>Squad Members</h2>
+                        <ul id="member-list" class="member-list">
+                            <!-- Example Members -->
+                            <li class="member-item">
+                                <span class="member-name">Georgia (You)</span>
+                                <button type="button" class="remove-member-btn" disabled
+                                    title="You can’t remove yourself">Remove</button>
+                            </li>
+                        </ul>
+                        <div class="add-member">
+                            <input type="text" id="new-member" placeholder="Enter username or email">
+                            <button type="button" class="pink-btn" id="add-member-btn">Send</button>
+                        </div>
+                    </section>
+
+                    <p class="form-error" role="alert" data-error hidden></p>
+
+                    <div class="form-actions">
+                        <button type="button" class="form-cancel" id="cancel-btn"
+                            onclick="window.location.href='all-squads.html'">Cancel</button>
+                        <button type="submit" class="form-submit">Save Changes</button>
+                    </div>
+                </form>
+
+                <div class="delete-section">
+                    <h3>! ! ! Danger Zone ! ! !</h3>
+                    <p>Deleting your squad is permanent and cannot be undone.</p>
+                    <button id="deletesquad-btn" class="deletesquad-btn">Delete Squad</button>
+                </div>
+            </section>
+
+            <!-- Delete Confirmation Modal -->
+            <div class="modal" id="delete-modal">
+                <div class="modal-content">
+                    <h2>Delete Squad?</h2>
+                    <p>Are you sure you want to delete this squad? This action cannot be undone.</p>
+                    <div class="modal-actions">
+                        <button class="form-cancel" id="cancel-delete">Cancel</button>
+                        <button class="red-btn" id="confirm-delete">Yes, Delete Squad</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Auth System -->
+    <script src="supabase-auth.js"></script>
+    <!-- Site Scripts -->
+    <script src="js/script.js"></script>
+    <script src="js/theme-toggle.js"></script>
+    <script src="js/manage-squad.js"></script>    
+
+    <!-- Hamburger menu for navbar -->
+    <script src="js/burger-menu.js"></script>
+
+</body>
+
+</html>
