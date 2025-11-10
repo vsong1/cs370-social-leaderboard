@@ -34,14 +34,36 @@
     <main class="profile-main" id="profile-content" style="display: none;">
         <section class="profile-container" data-animate-on-scroll>
             <header class="profile-header">
-                <div class="profile-avatar" aria-label="Squad Score avatar">
-                    <span>SS</span>
+                <div class="profile-avatar-wrapper">
+                    <button class="profile-avatar-trigger" type="button" data-avatar-trigger aria-label="Upload profile avatar" disabled aria-disabled="true">
+                        <div class="profile-avatar" aria-live="polite" data-avatar-accent="sunset" data-avatar-state="initials" data-avatar-editable="false">
+                            <span class="profile-avatar-initials" data-profile-avatar-initials>SS</span>
+                            <img class="profile-avatar-image" data-profile-avatar-image alt="Profile avatar" hidden>
+                        </div>
+                    </button>
+                    <input class="sr-only" type="file" id="profile-avatar-input" accept="image/*" data-avatar-input>
                 </div>
                 <div class="profile-summary">
                     <h1 class="profile-name" data-profile-field="fullName"></h1>
                     <!-- <p class="profile-tagline" data-profile-field="tagline">Joined Since: March 2024</p> -->
                     <button class="profile-edit-button" type="button" data-profile-action="edit">Edit Profile</button>
-                </div>
+                    <div class="profile-avatar-tools" data-avatar-tools hidden>
+                        <button class="avatar-upload-button" type="button" data-avatar-upload aria-disabled="true">
+                            <span class="avatar-upload-icon" aria-hidden="true">📷</span>
+                            <span>Upload photo</span>
+                        </button>
+                        <span class="avatar-tool-divider" aria-hidden="true">or</span>
+                        <div class="profile-avatar-accents" data-avatar-accent-panel hidden>
+                            <p class="avatar-accent-title">Choose an accent color</p>
+                            <div class="avatar-accent-options" role="group" aria-label="Avatar accent colors" data-avatar-accent-group>
+                                <button type="button" class="avatar-accent-chip is-selected" data-avatar-accent-option="sunset">Sunset</button>
+                                <button type="button" class="avatar-accent-chip" data-avatar-accent-option="violet">Violet</button>
+                                <button type="button" class="avatar-accent-chip" data-avatar-accent-option="ocean">Ocean</button>
+                                <button type="button" class="avatar-accent-chip" data-avatar-accent-option="forest">Forest</button>
+                            </div>
+                        </div>
+                        <button class="profile-avatar-reset" type="button" data-avatar-reset hidden>Reset to initials</button>
+                    </div>
             </header>
 
             <form class="profile-grid" id="profile-form" novalidate>
@@ -101,6 +123,40 @@
                 </button>
             </div>
         </section>
+
+        <div class="avatar-modal" data-avatar-modal hidden aria-hidden="true">
+            <div class="avatar-modal-backdrop" data-avatar-dismiss></div>
+            <div class="avatar-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="avatar-modal-title">
+                <div class="avatar-modal-header">
+                    <h2 id="avatar-modal-title">Update Avatar</h2>
+                    <button class="avatar-modal-close" type="button" data-avatar-dismiss aria-label="Close avatar editor">&times;</button>
+                </div>
+                <div class="avatar-modal-body">
+                    <div class="avatar-cropper">
+                        <canvas id="avatar-crop-canvas" width="320" height="320" data-avatar-canvas aria-label="Avatar crop preview" role="img" hidden></canvas>
+                        <div class="avatar-cropper-placeholder" data-avatar-placeholder>
+                            <span class="avatar-cropper-placeholder-icon">📷</span>
+                            <p>Select a photo to start cropping.</p>
+                        </div>
+                        <canvas id="avatar-output-canvas" width="320" height="320" hidden></canvas>
+                        <p class="avatar-cropper-hint">Drag image to reposition. Use the slider to zoom.</p>
+                    </div>
+                    <div class="avatar-control-group">
+                        <label class="avatar-control-label" for="avatar-zoom-range">Zoom</label>
+                        <input type="range" id="avatar-zoom-range" min="1" max="3" step="0.01" value="1" data-avatar-zoom>
+                    </div>
+                    <div class="avatar-control-group avatar-control-row">
+                        <button type="button" class="avatar-modal-action ghost" data-avatar-repick>Choose different photo</button>
+                        <button type="button" class="avatar-modal-action ghost" data-avatar-reset-modal>Reset to initials</button>
+                    </div>
+                    <p class="avatar-error" data-avatar-error hidden></p>
+                </div>
+                <div class="avatar-modal-footer">
+                    <button class="avatar-modal-action secondary" type="button" data-avatar-dismiss>Cancel</button>
+                    <button class="avatar-modal-action primary" type="button" data-avatar-apply disabled>Apply Avatar</button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Supabase CDN -->
@@ -212,7 +268,7 @@
                     const nameElement = document.querySelector('[data-profile-field="fullName"]');
                     if (nameElement) nameElement.textContent = displayName;
                     
-                    const avatarElement = document.querySelector('.profile-avatar span');
+                    const avatarElement = document.querySelector('[data-profile-avatar-initials]');
                     if (avatarElement) {
                         const username = profile.username || user.email;
                         const initials = username.substring(0, 2).toUpperCase();
@@ -251,7 +307,7 @@
                     const nameElement = document.querySelector('[data-profile-field="fullName"]');
                     if (nameElement) nameElement.textContent = username;
                     
-                    const avatarElement = document.querySelector('.profile-avatar span');
+                    const avatarElement = document.querySelector('[data-profile-avatar-initials]');
                     if (avatarElement) {
                         const initials = username.substring(0, 2).toUpperCase();
                         avatarElement.textContent = initials;
