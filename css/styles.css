@@ -254,6 +254,16 @@ body {
     border-radius: 1px;
 }
 
+body:not([data-auth-state="signed-in"]) .hamburger,
+body:not([data-auth-state="signed-in"]) .nav-links {
+    display: none !important;
+}
+
+body[data-auth-state="signed-in"] .nav-links a[href="index.html"] {
+    display: none !important;
+}
+
+
 /* Main Content */
 .main-content {
     display: flex;
