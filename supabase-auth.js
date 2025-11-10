@@ -51,22 +51,70 @@ async function init() {
 // Update UI based on auth state
 function updatePageUI() {
     const greeting = document.querySelector('.nav-greeting span');
-    
+    const navLinks = document.querySelector('.nav-links');
+    const navAnchors = navLinks ? Array.from(navLinks.querySelectorAll('a')) : [];
+    const homeLinks = navAnchors.filter(link => link.getAttribute('href') === 'index.html');
+    const hamburger = document.querySelector('.hamburger');
+    const body = document.body;
+
+    if (!body) {
+        return;
+    }
     if (currentUser) {
         // User is logged in
         const username = currentUser.user_metadata?.username || 
                         currentUser.email?.split('@')[0] || 
                         'User';
         
+        body.setAttribute('data-auth-state', 'signed-in');
+        
         if (greeting) {
             greeting.textContent = `Hi, ${username}!`;
+        }
+        if (navLinks) {
+            navLinks.setAttribute('aria-hidden', 'false');
+        }
+
+        navAnchors.forEach(link => {
+            link.setAttribute('aria-hidden', 'false');
+            link.removeAttribute('tabindex');
+        });
+
+        homeLinks.forEach(link => {
+            link.setAttribute('aria-hidden', 'true');
+            link.setAttribute('tabindex', '-1');
+        });
+
+        if (hamburger) {
+            hamburger.disabled = false;
+            hamburger.classList.remove('active');
+            hamburger.setAttribute('aria-hidden', 'false');
+            hamburger.setAttribute('aria-expanded', 'false');
         }
         
         console.log('✅ UI updated for logged in user:', username);
     } else {
         // User is logged out
+        body.removeAttribute('data-auth-state');
         if (greeting) {
             greeting.textContent = 'Welcome to Squad Score!';
+        }
+
+        if (navLinks) {
+            navLinks.classList.remove('active');
+            navLinks.setAttribute('aria-hidden', 'true');
+        }
+
+        navAnchors.forEach(link => {
+            link.setAttribute('aria-hidden', 'true');
+            link.setAttribute('tabindex', '-1');
+        });
+
+        if (hamburger) {
+            hamburger.classList.remove('active');
+            hamburger.disabled = true;
+            hamburger.setAttribute('aria-hidden', 'true');
+            hamburger.setAttribute('aria-expanded', 'false');
         }
         
         console.log('ℹ️ UI updated for logged out state');
