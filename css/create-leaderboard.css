@@ -5,6 +5,38 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
+        position: relative;
+}
+
+.create-leaderboard__back-link {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: var(--bx-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.create-leaderboard__back-link:hover,
+.create-leaderboard__back-link:focus-visible {
+    transform: translateY(-2px);
+    border-color: var(--accent-green);
+    box-shadow: var(--bx-shadow);
+    outline: none;
+}
+
+.create-leaderboard__back-text {
+    white-space: nowrap;
 }
 
 .create-leaderboard-container {
