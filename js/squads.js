@@ -238,7 +238,7 @@ const renderSquads = () => {
     ensureListVisibility();
 };
 
-const handleCreateSubmit = (event) => {
+const handleCreateSubmit = async (event) => {
     event.preventDefault();
     if (!selectors.form) {
         return;
@@ -253,113 +253,131 @@ const handleCreateSubmit = (event) => {
     const trimmedName = nextRecord.squad_name.trim();
     const trimmedGame = nextRecord.game_title.trim();
     const trimmedTier = (nextRecord.skill_tier || '').trim();
-    const trimmedInvite = (nextRecord.invite_code || '').trim().toUpperCase();
+    const trimmedInvite = (nextRecord.invite_code || '').trim();
     const trimmedDescription = (nextRecord.description || '').trim();
     const visibility = nextRecord.visibility;
-
-    const duplicateName = squadState.records.find(
-        (record) => record.squad_name.toLowerCase() === trimmedName.toLowerCase()
-    );
-    if (duplicateName) {
-        showError('A squad with this name already exists. Try a different name.');
-        return;
-    }
 
     if (visibility === 'private' && !trimmedInvite) {
         showError('Private squads require an invite code.');
         return;
     }
 
-    const inviteInUse =
-        trimmedInvite &&
-        squadState.directory.some((record) => normalizeCode(record.invite_code) === normalizeCode(trimmedInvite));
-    if (inviteInUse) {
-        showError('This invite code is already in use. Choose a different code.');
-        return;
-    }
-
     clearError();
 
-    const user = window.authService?.getUser();
+    // Disable form while submitting
+    const submitButton = selectors.form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton?.textContent;
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Creating...';
+    }
 
-    const baseRecord = {
-        id: `sq_${Date.now()}`,
-        owner: user?.sub ?? null,
-        created_at: new Date().toISOString(),
-        squad_name: trimmedName,
-        game_title: trimmedGame,
-        skill_tier: trimmedTier,
-        visibility,
-        invite_code: trimmedInvite,
-        description: trimmedDescription
-    };
+    try {
+        // Create squad in database
+        const { data: squad, error } = await window.Database.createSquad({
+            name: trimmedName,
+            game_title: trimmedGame,
+            skill_tier: trimmedTier || null,
+            visibility: visibility || 'public',
+            invite_code: trimmedInvite || null,
+            description: trimmedDescription || null
+        });
 
-    const userRecord = {
-        ...baseRecord,
-        membership: 'owner'
-    };
+        if (error) {
+            showError(error.message || 'Failed to create squad. Please try again.');
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+            return;
+        }
 
-    squadState.records.push(userRecord);
-    squadState.directory.push({ ...baseRecord });
+        // Success - reset form and close panel
+        selectors.form.reset();
+        togglePanel(false);
+        
+        // Reload squads to show the new one
+        // For createsquad.html, we'll reload the page to refresh the list
+        // For chat.html, it will auto-refresh when navigated to
+        if (window.location.pathname.includes('createsquad.html')) {
+            // Reload the page to show the new squad in the list
+            window.location.reload();
+        } else {
+            // If we're on a different page, just show success
+            alert('Squad created successfully!');
+        }
 
-    writeUserRecords(squadState.records);
-    writeToStorage(DIRECTORY_KEY, squadState.directory);
-
-    renderSquads();
-    togglePanel(false);
+    } catch (error) {
+        console.error('Unexpected error creating squad:', error);
+        showError('An unexpected error occurred. Please try again.');
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+        }
+    }
 };
 
-const handleJoinSubmit = (event) => {
+const handleJoinSubmit = async (event) => {
     event.preventDefault();
     if (!selectors.joinForm) {
         return;
     }
 
     const formData = new FormData(selectors.joinForm);
-    const inviteInput = (formData.get('invite_code') || '').trim().toUpperCase();
+    const inviteInput = (formData.get('invite_code') || '').trim();
 
     if (!inviteInput) {
         showJoinError('Please enter an invitation code.');
         return;
     }
 
-    const normalizedInvite = normalizeCode(inviteInput);
-
-    const directoryMatch = squadState.directory.find(
-        (record) => record.invite_code && normalizeCode(record.invite_code) === normalizedInvite
-    );
-
-    if (!directoryMatch) {
-        showJoinError('No squad found for that invitation code.');
-        return;
-    }
-
-    const alreadyMember = squadState.records.find(
-        (record) =>
-            record.id === directoryMatch.id ||
-            (record.invite_code && normalizeCode(record.invite_code) === normalizedInvite)
-    );
-
-    if (alreadyMember) {
-        showJoinError('You are already part of this squad.');
-        return;
-    }
-
     clearJoinError();
 
-    const joinedRecord = {
-        ...directoryMatch,
-        membership: 'member',
-        joined_at: new Date().toISOString()
-    };
+    // Disable form while submitting
+    const submitButton = selectors.joinForm.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton?.textContent;
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Joining...';
+    }
 
-    squadState.records.push(joinedRecord);
-    writeUserRecords(squadState.records);
-    renderSquads();
+    try {
+        // Join squad using database
+        const { data, error } = await window.Database.joinSquadByInviteCode(inviteInput);
 
-    selectors.joinForm.reset();
-    showJoinFeedback('Joined squad successfully!');
-    selectors.joinForm.querySelector('input')?.focus();
+        if (error) {
+            showJoinError(error.message || 'Failed to join squad. Please check the invite code and try again.');
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+            return;
+        }
+
+        // Success
+        selectors.joinForm.reset();
+        showJoinFeedback('Joined squad successfully!');
+        
+        // Reload page to show the new squad
+        if (window.location.pathname.includes('joinsquad.html') || window.location.pathname.includes('createsquad.html')) {
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            // If on a different page, redirect to chat
+            setTimeout(() => {
+                window.location.href = 'chat.html';
+            }, 1000);
+        }
+
+    } catch (error) {
+        console.error('Unexpected error joining squad:', error);
+        showJoinError('An unexpected error occurred. Please try again.');
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+        }
+    }
 };
 
 const handleToggle = () => {
@@ -369,13 +387,49 @@ const handleToggle = () => {
 
 const handleCancel = () => togglePanel(false);
 
-const init = () => {
+const init = async () => {
     if (!selectors.list) {
         return;
     }
 
-    squadState.directory = readDirectory();
-    squadState.records = readUserRecords();
+    // Wait for auth and database to initialize
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Load squads from database instead of localStorage
+    try {
+        const { data: squads, error } = await window.Database?.getUserSquads();
+        
+        if (error) {
+            console.error('Error loading squads:', error);
+            // Fall back to localStorage if database fails
+            squadState.directory = readDirectory();
+            squadState.records = readUserRecords();
+        } else if (squads && squads.length > 0) {
+            // Convert database squads to the format expected by renderSquads
+            squadState.records = squads.map(squad => ({
+                id: squad.id,
+                squad_name: squad.name,
+                game_title: squad.game_title,
+                skill_tier: squad.skill_tier,
+                visibility: squad.visibility,
+                invite_code: squad.invite_code,
+                description: squad.description,
+                created_at: squad.created_at,
+                membership: squad.membershipRole || 'member',
+                owner: squad.created_by
+            }));
+            squadState.directory = [...squadState.records];
+        } else {
+            // No squads in database, check localStorage as fallback
+            squadState.directory = readDirectory();
+            squadState.records = readUserRecords();
+        }
+    } catch (error) {
+        console.error('Unexpected error loading squads:', error);
+        // Fall back to localStorage
+        squadState.directory = readDirectory();
+        squadState.records = readUserRecords();
+    }
 
     renderSquads();
 

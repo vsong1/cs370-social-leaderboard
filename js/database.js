@@ -293,6 +293,260 @@ async function getSimpleLeaderboardEntries(leaderboardId) {
     return { data: simpleEntries, error: null };
 }
 
+/**
+ * SQUAD FUNCTIONS
+ */
+
+// Get all squads the current user is a member of
+async function getUserSquads() {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const userId = await getCurrentUserId();
+    if (!userId) return { data: null, error: 'User not logged in' };
+    
+    // Get all squad memberships for the user
+    const { data: memberships, error: membershipError } = await supabase
+        .from('squad_membership')
+        .select(`
+            *,
+            squad:squad_id (
+                id,
+                name,
+                description,
+                game_title,
+                skill_tier,
+                invite_code,
+                visibility,
+                created_at,
+                created_by
+            )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+    
+    if (membershipError) return { data: null, error: membershipError };
+    
+    // Format response
+    const squads = memberships.map(m => ({
+        ...m.squad,
+        membershipRole: m.role,
+        joinedAt: m.created_at
+    }));
+    
+    return { data: squads, error: null };
+}
+
+// Get member count for a squad
+async function getSquadMemberCount(squadId) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return 0;
+    
+    const { count, error } = await supabase
+        .from('squad_membership')
+        .select('*', { count: 'exact', head: true })
+        .eq('squad_id', squadId);
+    
+    if (error) return 0;
+    return count || 0;
+}
+
+// Get all members of a squad
+async function getSquadMembers(squadId) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const userId = await getCurrentUserId();
+    if (!userId) return { data: null, error: 'User not logged in' };
+    
+    // Verify user is a member of the squad
+    const { data: userMembership, error: checkError } = await supabase
+        .from('squad_membership')
+        .select('id')
+        .eq('squad_id', squadId)
+        .eq('user_id', userId)
+        .single();
+    
+    if (checkError || !userMembership) {
+        return { data: null, error: 'You are not a member of this squad' };
+    }
+    
+    // Get all members
+    const { data: memberships, error: membersError } = await supabase
+        .from('squad_membership')
+        .select(`
+            *,
+            user:user_id (
+                id,
+                username,
+                email,
+                first_name,
+                last_name
+            )
+        `)
+        .eq('squad_id', squadId);
+    
+    if (membersError) return { data: null, error: membersError };
+    
+    // Format response
+    const members = memberships.map(m => ({
+        userId: m.user_id,
+        role: m.role,
+        joinedAt: m.created_at,
+        username: m.user?.username || m.user?.email?.split('@')[0] || 'Unknown',
+        email: m.user?.email,
+        firstName: m.user?.first_name,
+        lastName: m.user?.last_name
+    }));
+    
+    return { data: members, error: null };
+}
+
+// Create a new squad
+async function createSquad(squadData) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const userId = await getCurrentUserId();
+    if (!userId) return { data: null, error: 'User not logged in' };
+    
+    const { name, game_title, skill_tier, visibility, invite_code, description } = squadData;
+    
+    // Validate required fields
+    if (!name || !game_title) {
+        return { data: null, error: 'Squad name and game title are required' };
+    }
+    
+    // Check if squad name already exists
+    const { data: existingSquad, error: checkError } = await supabase
+        .from('squad')
+        .select('id')
+        .ilike('name', name.trim())
+        .limit(1)
+        .single();
+    
+    if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found" which is fine
+        return { data: null, error: checkError };
+    }
+    
+    if (existingSquad) {
+        return { data: null, error: 'A squad with this name already exists' };
+    }
+    
+    // Check if invite code is already in use (if provided)
+    if (invite_code && invite_code.trim()) {
+        const { data: codeInUse, error: codeError } = await supabase
+            .from('squad')
+            .select('id')
+            .eq('invite_code', invite_code.trim().toUpperCase())
+            .limit(1)
+            .single();
+        
+        if (codeError && codeError.code !== 'PGRST116') {
+            return { data: null, error: codeError };
+        }
+        
+        if (codeInUse) {
+            return { data: null, error: 'This invite code is already in use' };
+        }
+    }
+    
+    // Create the squad
+    const squadInsert = {
+        name: name.trim(),
+        game_title: game_title.trim(),
+        skill_tier: skill_tier?.trim() || null,
+        visibility: visibility || 'public',
+        invite_code: invite_code?.trim().toUpperCase() || null,
+        description: description?.trim() || null,
+        created_by: userId
+    };
+    
+    const { data: squad, error: squadError } = await supabase
+        .from('squad')
+        .insert(squadInsert)
+        .select()
+        .single();
+    
+    if (squadError) {
+        return { data: null, error: squadError };
+    }
+    
+    // Create squad membership for the creator (owner role)
+    const { data: membership, error: membershipError } = await supabase
+        .from('squad_membership')
+        .insert({
+            squad_id: squad.id,
+            user_id: userId,
+            role: 'owner'
+        })
+        .select()
+        .single();
+    
+    if (membershipError) {
+        // Clean up squad if membership creation fails
+        await supabase.from('squad').delete().eq('id', squad.id);
+        return { data: null, error: membershipError };
+    }
+    
+    return { data: { ...squad, membershipRole: 'owner' }, error: null };
+}
+
+// Join a squad using an invite code
+async function joinSquadByInviteCode(inviteCode) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const userId = await getCurrentUserId();
+    if (!userId) return { data: null, error: 'User not logged in' };
+    
+    const normalizedCode = inviteCode.trim().toUpperCase();
+    
+    // Find squad by invite code
+    const { data: squad, error: squadError } = await supabase
+        .from('squad')
+        .select('id, name, visibility')
+        .eq('invite_code', normalizedCode)
+        .single();
+    
+    if (squadError || !squad) {
+        return { data: null, error: 'No squad found with that invite code' };
+    }
+    
+    // Check if user is already a member
+    const { data: existingMembership, error: checkError } = await supabase
+        .from('squad_membership')
+        .select('id')
+        .eq('squad_id', squad.id)
+        .eq('user_id', userId)
+        .single();
+    
+    if (checkError && checkError.code !== 'PGRST116') {
+        return { data: null, error: checkError };
+    }
+    
+    if (existingMembership) {
+        return { data: null, error: 'You are already a member of this squad' };
+    }
+    
+    // Create membership
+    const { data: membership, error: membershipError } = await supabase
+        .from('squad_membership')
+        .insert({
+            squad_id: squad.id,
+            user_id: userId,
+            role: 'member'
+        })
+        .select()
+        .single();
+    
+    if (membershipError) {
+        return { data: null, error: membershipError };
+    }
+    
+    return { data: { squad, membership }, error: null };
+}
+
 // Export functions to window for use in other scripts
 window.Database = {
     getSupabaseClient,
@@ -304,7 +558,12 @@ window.Database = {
     getLeaderboardEntries,
     addLeaderboardEntry,
     updateLeaderboardEntry,
-    getSimpleLeaderboardEntries
+    getSimpleLeaderboardEntries,
+    getUserSquads,
+    getSquadMemberCount,
+    getSquadMembers,
+    createSquad,
+    joinSquadByInviteCode
 };
 
 console.log('📦 Database.js loaded');

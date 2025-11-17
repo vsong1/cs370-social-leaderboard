@@ -37,7 +37,7 @@
         <aside class="chat-sidebar">
             <div class="chat-sidebar-header">
                 <h2 class="chat-sidebar-title">Your Squads</h2>
-                <span class="chat-badge">3 Active</span>
+                <span class="chat-badge" id="squad-count-badge">0 Active</span>
             </div>
 
             <div class="chat-sidebar-actions">
@@ -53,77 +53,37 @@
                 <input type="search" placeholder="Search squads or players" aria-label="Search squads">
             </div>
 
-            <div class="chat-squad-list" role="tablist" aria-label="Squad conversations">
-                <button class="chat-squad-card active" role="tab" data-squad="Valorant Legends" aria-selected="true">
-                    <div class="chat-squad-info">
-                        <span class="chat-squad-name">Valorant Legends</span>
-                        <span class="chat-squad-meta">5 members · Active now</span>
-                    </div>
-                    <span class="chat-badge">Ranked</span>
-                </button>
-
-                <button class="chat-squad-card" role="tab" data-squad="Net Ninjas" aria-selected="false">
-                    <div class="chat-squad-info">
-                        <span class="chat-squad-name">Net Ninjas</span>
-                        <span class="chat-squad-meta">4 members · 8 unread</span>
-                    </div>
-                    <span class="chat-badge">Tournament</span>
-                </button>
-
-                <button class="chat-squad-card" role="tab" data-squad="CSGO Allstars" aria-selected="false">
-                    <div class="chat-squad-info">
-                        <span class="chat-squad-name">CSGO Allstars</span>
-                        <span class="chat-squad-meta">8 members · Last match 2h ago</span>
-                    </div>
-                    <span class="chat-badge">Scrim</span>
-                </button>
+            <div class="chat-squad-list" role="tablist" aria-label="Squad conversations" id="chat-squad-list">
+                <!-- Squads will be loaded dynamically here -->
+                <div class="chat-empty-state" id="chat-empty-state" style="display: none;">
+                    <p>You're not part of any squads yet.</p>
+                    <p>Create or join a squad to get started!</p>
+                </div>
             </div>
         </aside>
 
         <section class="chat-window" aria-live="polite">
-            <header class="chat-header">
+            <header class="chat-header" id="chat-header">
                 <div class="chat-header-info">
-                    <h1 class="chat-header-title">Valorant Legends</h1>
-                    <span class="chat-header-status">5 players online · Strategy session</span>
+                    <h1 class="chat-header-title" id="chat-header-title">Select a squad</h1>
+                    <span class="chat-header-status" id="chat-header-status">Choose a squad from the sidebar to start chatting</span>
                 </div>
-                <div class="chat-header-actions">
-                    <button class="chat-action-button" type="button">View Squad</button>
-                    <button class="chat-action-button" type="button">Add Member</button>
+                <div class="chat-header-actions" id="chat-header-actions" style="display: none;">
+                    <button class="chat-action-button" type="button" id="view-squad-btn">View Squad</button>
+                    <button class="chat-action-button" type="button" id="add-member-btn">Add Member</button>
                 </div>
             </header>
 
             <div class="chat-message-list" id="chat-message-list">
-                <div class="chat-day-separator">Today</div>
-
-                <article class="chat-message" data-author="Kai">
-                    <div class="chat-message-header">
-                        <span>Kai</span>
-                        <time datetime="2024-03-18T18:24">18:24</time>
-                    </div>
-                    <p class="chat-message-body">Great scrim tonight! Uploading the VOD now so we can review the mid-round calls.</p>
-                </article>
-
-                <article class="chat-message outgoing" data-author="You">
-                    <div class="chat-message-header">
-                        <span>You</span>
-                        <time datetime="2024-03-18T18:27">18:27</time>
-                    </div>
-                    <p class="chat-message-body">Awesome—let's bookmark the eco round at 6:35. We need a cleaner rotate there.</p>
-                </article>
-
-                <article class="chat-message" data-author="Mira">
-                    <div class="chat-message-header">
-                        <span>Mira</span>
-                        <time datetime="2024-03-18T18:31">18:31</time>
-                    </div>
-                    <p class="chat-message-body">Agree. Also swapping Sage wall placement on B would stop the quick push. I'll mock a setup.</p>
-                </article>
+                <div class="chat-empty-messages" id="chat-empty-messages">
+                    <p>Select a squad to view messages</p>
+                </div>
             </div>
 
             <form class="chat-composer" id="chat-composer" autocomplete="off">
                 <label for="chat-message" class="sr-only">Type your message</label>
-                <textarea id="chat-message" name="message" placeholder="Type a message" required></textarea>
-                <button class="chat-send-button" type="submit">Send</button>
+                <textarea id="chat-message" name="message" placeholder="Select a squad to start chatting" required disabled></textarea>
+                <button class="chat-send-button" type="submit" disabled>Send</button>
             </form>
         </section>
     </main>
