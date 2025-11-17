@@ -38,8 +38,8 @@ function handleNavigation(page) {
             window.location.href = 'all-leaderboards.html';
             break;
         case 'My Squads':
-            // Navigate to squad chat hub
-            window.location.href = 'chat.html';
+            // Navigate to all squads page
+            window.location.href = 'all-squads.html';
             break;
         case 'Profile':
             window.location.href = 'profile.html';

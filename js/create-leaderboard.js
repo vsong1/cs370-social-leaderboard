@@ -1,53 +1,53 @@
 // Create Leaderboard functionality
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('create-leaderboard-form');
-    const iconOptions = document.querySelectorAll('.icon-option');
+    // const iconOptions = document.querySelectorAll('.icon-option');
     const gameSelection = document.getElementById('game-selection');
     const leaderboardName = document.getElementById('leaderboard-name');
     const createButton = document.querySelector('.create-button');
     
     let selectedIcon = null;
     
-    // Icon selection functionality
-    iconOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            // Remove selected class from all options
-            iconOptions.forEach(opt => opt.classList.remove('selected'));
+    // // Icon selection functionality
+    // iconOptions.forEach(option => {
+    //     option.addEventListener('click', function() {
+    //         // Remove selected class from all options
+    //         iconOptions.forEach(opt => opt.classList.remove('selected'));
             
-            // Add selected class to clicked option
-            this.classList.add('selected');
-            selectedIcon = this.dataset.icon;
+    //         // Add selected class to clicked option
+    //         this.classList.add('selected');
+    //         selectedIcon = this.dataset.icon;
             
-            // Handle custom icon upload
-            if (selectedIcon === 'add') {
-                handleCustomIconUpload();
-            }
-        });
-    });
+    //         // Handle custom icon upload
+    //         if (selectedIcon === 'add') {
+    //             handleCustomIconUpload();
+    //         }
+    //     });
+    // });
     
-    // Custom icon upload handler
-    function handleCustomIconUpload() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.style.display = 'none';
+    // // Custom icon upload handler
+    // function handleCustomIconUpload() {
+    //     const input = document.createElement('input');
+    //     input.type = 'file';
+    //     input.accept = 'image/*';
+    //     input.style.display = 'none';
         
-        input.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const addIcon = document.querySelector('.add-icon');
-                    addIcon.innerHTML = `<img src="${e.target.result}" alt="Custom Icon" style="width: 30px; height: 30px; object-fit: cover; border-radius: 50%;">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+    //     input.addEventListener('change', function(e) {
+    //         const file = e.target.files[0];
+    //         if (file) {
+    //             const reader = new FileReader();
+    //             reader.onload = function(e) {
+    //                 const addIcon = document.querySelector('.add-icon');
+    //                 addIcon.innerHTML = `<img src="${e.target.result}" alt="Custom Icon" style="width: 30px; height: 30px; object-fit: cover; border-radius: 50%;">`;
+    //             };
+    //             reader.readAsDataURL(file);
+    //         }
+    //     });
         
-        document.body.appendChild(input);
-        input.click();
-        document.body.removeChild(input);
-    }
+    //     document.body.appendChild(input);
+    //     input.click();
+    //     document.body.removeChild(input);
+    // }
     
     // Game selection with custom option
     gameSelection.addEventListener('change', function() {
@@ -103,10 +103,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
         
-        if (!selectedIcon) {
-            showError('Please select an icon');
-            return false;
-        }
+        // if (!selectedIcon) {
+        //     showError('Please select an icon');
+        //     return false;
+        // }
         
         return true;
     }
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get form data
         const formData = {
             name: leaderboardName.value.trim(),
-            icon: selectedIcon,
+            // icon: selectedIcon,
             game: gameSelection.value.trim(),
             members: Array.from(document.querySelectorAll('.member-item')).map(item => item.textContent.trim()),
             settings: {
@@ -203,8 +203,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Reset form
             form.reset();
-            iconOptions.forEach(opt => opt.classList.remove('selected'));
-            selectedIcon = null;
+            // iconOptions.forEach(opt => opt.classList.remove('selected'));
+            // selectedIcon = null;
             
             // Reset button
             createButton.disabled = false;
