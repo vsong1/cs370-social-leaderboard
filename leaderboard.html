@@ -64,6 +64,18 @@
                         <label for="add-score-value">Score</label>
                         <input id="add-score-value" name="score" type="number" required min="0" step="1" placeholder="Enter score">
                     </div>
+                    <div class="form-field form-field--evidence">
+                        <div class="form-field-header">
+                            <label for="add-score-evidence">Evidence (optional)</label>
+                            <span class="form-hint">Images only, max 5MB</span>
+                        </div>
+                        <input id="add-score-evidence" name="evidence" type="file" accept="image/*" hidden>
+                        <div class="evidence-control">
+                            <button type="button" class="form-attach" data-add-score-attach>Attach Evidence</button>
+                            <span class="evidence-filename" data-add-score-filename>No file selected</span>
+                            <button type="button" class="evidence-clear" data-add-score-clear hidden>Remove</button>
+                        </div>
+                    </div>
                     <p class="form-error" role="alert" data-add-score-error hidden></p>
                     <div class="form-actions">
                         <button type="button" class="form-cancel" data-add-score-cancel>Cancel</button>
