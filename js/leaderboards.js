@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Write entries to Supabase (this will add a new entry)
-    const writeSavedEntry = async (name, score) => {
+    const writeSavedEntry = async (name, score, evidenceFile = null) => {
         const leaderboardId = await getLeaderboardId();
         
         if (!leaderboardId) {
@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         
         try {
-            const { data, error } = await window.Database.addLeaderboardEntry(leaderboardId, name, score);
+            const { data, error } = await window.Database.addLeaderboardEntry(leaderboardId, name, score, evidenceFile);
             
             if (error) {
                 console.error('❌ Error saving entry:', error);
@@ -291,12 +291,71 @@ document.addEventListener('DOMContentLoaded', function () {
     const errorField = document.querySelector('[data-add-score-error]');
     const list = document.querySelector('.leaderboard-list');
     const userPalette = ['rank-1', 'rank-2', 'rank-3', 'rank-default'];
+    const evidenceInput = document.getElementById('add-score-evidence');
+    const evidenceAttachButton = document.querySelector('[data-add-score-attach]');
+    const evidenceFilename = document.querySelector('[data-add-score-filename]');
+    const evidenceClearButton = document.querySelector('[data-add-score-clear]');
+    let selectedEvidenceFile = null;
+    const EVIDENCE_MAX_BYTES = 5 * 1024 * 1024; // 5MB limit
 
 
 
     if (!trigger || !panel || !form || !list) {
         return;
     }
+
+    const showError = (message) => {
+        if (!errorField) return;
+        errorField.textContent = message;
+        errorField.hidden = false;
+    };
+
+    const hideError = () => {
+        if (!errorField) return;
+        errorField.textContent = '';
+        errorField.hidden = true;
+    };
+    
+    const resetEvidenceSelection = () => {
+        selectedEvidenceFile = null;
+        if (evidenceInput) {
+            evidenceInput.value = '';
+        }
+        if (evidenceFilename) {
+            evidenceFilename.textContent = 'No file selected';
+        }
+        if (evidenceClearButton) {
+            evidenceClearButton.hidden = true;
+        }
+    };
+    
+    const handleEvidenceSelection = (file) => {
+        if (!file) {
+            resetEvidenceSelection();
+            return;
+        }
+        
+        if (!file.type?.startsWith('image/')) {
+            showError('Evidence must be an image file.');
+            resetEvidenceSelection();
+            return;
+        }
+        
+        if (file.size > EVIDENCE_MAX_BYTES) {
+            showError('Evidence must be 5MB or smaller.');
+            resetEvidenceSelection();
+            return;
+        }
+        
+        hideError();
+        selectedEvidenceFile = file;
+        if (evidenceFilename) {
+            evidenceFilename.textContent = file.name;
+        }
+        if (evidenceClearButton) {
+            evidenceClearButton.hidden = false;
+        }
+    };
 
     const togglePanel = (shouldShow) => {
         if (shouldShow) {
@@ -310,20 +369,9 @@ document.addEventListener('DOMContentLoaded', function () {
             panel.style.transform = '';
             form.reset();
             hideError();
+            resetEvidenceSelection();
         }
         trigger.setAttribute('aria-expanded', String(shouldShow));
-    };
-
-    const showError = (message) => {
-        if (!errorField) return;
-        errorField.textContent = message;
-        errorField.hidden = false;
-    };
-
-    const hideError = () => {
-        if (!errorField) return;
-        errorField.textContent = '';
-        errorField.hidden = true;
     };
 
     trigger.addEventListener('click', () => {
@@ -332,6 +380,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     cancel?.addEventListener('click', () => togglePanel(false));
+    
+    evidenceAttachButton?.addEventListener('click', () => {
+        evidenceInput?.click();
+    });
+    
+    evidenceInput?.addEventListener('change', (event) => {
+        const file = event.target?.files?.[0];
+        handleEvidenceSelection(file);
+    });
+    
+    evidenceClearButton?.addEventListener('click', () => {
+        resetEvidenceSelection();
+    });
 
     const collectLeaderboardEntries = (listElement) => {
         return Array.from(listElement.querySelectorAll('.leaderboard-entry')).map((entry) => {
@@ -425,17 +486,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const score = Number(scoreValue);
+        const evidenceFile = selectedEvidenceFile;
 
         // Show loading state
         const submitButton = form.querySelector('button[type="submit"]');
         const originalButtonText = submitButton?.textContent;
         if (submitButton) {
             submitButton.disabled = true;
-            submitButton.textContent = 'Saving...';
+            submitButton.textContent = evidenceFile ? 'Uploading evidence...' : 'Saving...';
         }
 
         // Save to Supabase
-        const result = await window._leaderboardStore?.writeSavedEntry(name, score);
+        const result = await window._leaderboardStore?.writeSavedEntry(name, score, evidenceFile);
         
         if (!result || !result.success) {
             showError(result?.error?.message || 'Failed to save score. Please try again.');
@@ -475,6 +537,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         
         rebuildLeaderboard(list, existingEntries);
+        resetEvidenceSelection();
 
         if (submitButton) {
             submitButton.disabled = false;

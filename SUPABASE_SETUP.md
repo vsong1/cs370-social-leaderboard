@@ -102,6 +102,7 @@ CREATE TABLE public.match_result (
   status         result_status NOT NULL DEFAULT 'pending',
   submitted_by   UUID NOT NULL REFERENCES public."user"(id) ON DELETE RESTRICT,
   reviewed_by    UUID REFERENCES public."user"(id) ON DELETE SET NULL,
+  evidence_url   TEXT,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -196,3 +197,37 @@ WITH CHECK (auth.uid() = id);
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================================
+-- STORAGE BUCKET SETUP
+-- ============================================================
+-- After running the above SQL, you need to create a storage bucket
+-- for leaderboard evidence uploads:
+--
+-- 1. Go to your Supabase Dashboard
+-- 2. Navigate to Storage
+-- 3. Click "Create Bucket"
+-- 4. Name: "leaderboard-evidence"
+-- 5. Set to Public (so evidence images can be viewed)
+-- 6. Optional: Set file size limit to 5MB
+-- 7. Click "Create Bucket"
+--
+-- Storage Policies (RLS):
+-- You may need to set up storage policies to allow authenticated users
+-- to upload files. In the Supabase Dashboard:
+-- 1. Go to Storage → leaderboard-evidence → Policies
+-- 2. Create a policy for INSERT (upload):
+--    - Policy name: "Allow authenticated users to upload"
+--    - Allowed operation: INSERT
+--    - Policy definition: (bucket_id = 'leaderboard-evidence'::text) AND (auth.role() = 'authenticated'::text)
+-- 3. Create a policy for SELECT (read):
+--    - Policy name: "Allow public to read"
+--    - Allowed operation: SELECT
+--    - Policy definition: (bucket_id = 'leaderboard-evidence'::text)
+--
+-- ============================================================
+-- MIGRATION: Add evidence_url column (if table already exists)
+-- ============================================================
+-- If you already have the match_result table, run this to add the evidence_url column:
+--
+-- ALTER TABLE public.match_result ADD COLUMN IF NOT EXISTS evidence_url TEXT;

@@ -1098,6 +1098,77 @@ body[data-auth-state="signed-in"] .nav-links a[href="index.html"] {
     gap: 0.5rem;
 }
 
+.leaderboard-add-score-form .form-field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.leaderboard-add-score-form .form-field-header .form-hint {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgba(var(--text-primary-rgb), 0.5);
+}
+
+.leaderboard-add-score-form .form-field--evidence {
+    gap: 0.75rem;
+}
+
+.leaderboard-add-score-form .evidence-control {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.leaderboard-add-score-form .form-attach {
+    background: rgba(var(--accent-orange-rgb), 0.08);
+    border: 1px dashed rgba(var(--accent-orange-rgb), 0.9);
+    color: var(--accent-orange);
+    padding: 0.65rem 1.4rem;
+    border-radius: 999px;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.leaderboard-add-score-form .form-attach:hover,
+.leaderboard-add-score-form .form-attach:focus-visible {
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 18px rgba(var(--accent-orange-rgb), 0.2);
+    outline: none;
+}
+
+.leaderboard-add-score-form .evidence-filename {
+    flex: 1;
+    min-width: 180px;
+    font-size: 0.85rem;
+    color: rgba(var(--text-primary-rgb), 0.7);
+    word-break: break-word;
+}
+
+.leaderboard-add-score-form .evidence-clear {
+    background: transparent;
+    border: 1px solid var(--border-soft);
+    color: rgba(var(--text-primary-rgb), 0.7);
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.leaderboard-add-score-form .evidence-clear:hover {
+    background: rgba(var(--text-primary-rgb), 0.1);
+}
+
 .leaderboard-add-score-form label {
     font-size: 0.85rem;
     letter-spacing: 0.08em;
@@ -2044,7 +2115,6 @@ body.avatar-modal-open {
         align-items: stretch;
     }
 }
-
 
 
 

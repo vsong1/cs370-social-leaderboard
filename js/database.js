@@ -203,9 +203,126 @@ async function getLeaderboardEntries(leaderboardId) {
     return { data: entries, error: null };
 }
 
+const LEADERBOARD_EVIDENCE_BUCKET = 'leaderboard-evidence';
+let leaderboardEvidenceBucketReady = false;
+
+async function ensureLeaderboardEvidenceBucket() {
+    if (leaderboardEvidenceBucketReady) {
+        return { success: true };
+    }
+    
+    const supabase = getSupabaseClient();
+    if (!supabase) return { success: false, error: { message: 'Supabase not initialized' } };
+    
+    // Try listing a file to confirm bucket exists
+    const { error: listError } = await supabase.storage
+        .from(LEADERBOARD_EVIDENCE_BUCKET)
+        .list('', { limit: 1 });
+    
+    if (!listError) {
+        leaderboardEvidenceBucketReady = true;
+        return { success: true };
+    }
+    
+    // Check if bucket doesn't exist
+    const errorMessage = listError?.message?.toLowerCase() || '';
+    if (errorMessage.includes('bucket not found') || errorMessage.includes('not found')) {
+        // Try to create the bucket (this may fail due to permissions)
+        const { error: createError } = await supabase.storage.createBucket(LEADERBOARD_EVIDENCE_BUCKET, {
+            public: true,
+            fileSizeLimit: 5 * 1024 * 1024
+        });
+        
+        if (createError) {
+            // If creation fails, provide helpful instructions
+            const createErrorMessage = createError?.message?.toLowerCase() || '';
+            let friendlyMessage = 'Storage bucket "leaderboard-evidence" not found. ';
+            
+            if (createErrorMessage.includes('permission') || createErrorMessage.includes('unauthorized') || createErrorMessage.includes('forbidden')) {
+                friendlyMessage += 'You need to create it manually in the Supabase Dashboard: ';
+                friendlyMessage += 'Go to Storage → Create Bucket → Name it "leaderboard-evidence" → Set it to Public.';
+            } else {
+                friendlyMessage += 'Please create the "leaderboard-evidence" bucket in Supabase Storage (Storage → Create Bucket).';
+            }
+            
+            return { 
+                success: false, 
+                error: { 
+                    message: friendlyMessage,
+                    originalError: createError
+                } 
+            };
+        }
+        
+        leaderboardEvidenceBucketReady = true;
+        return { success: true };
+    }
+    
+    // For other errors, return them as-is
+    return { 
+        success: false, 
+        error: listError || { message: 'Unknown error checking storage bucket' } 
+    };
+}
+
+async function uploadLeaderboardEvidence(leaderboardId, matchResultId, file) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    if (!file) return { data: null, error: null };
+    
+    const ensured = await ensureLeaderboardEvidenceBucket();
+    if (!ensured.success) {
+        return { data: null, error: ensured.error || { message: 'Evidence storage bucket not available.' } };
+    }
+    
+    if (!file.type?.startsWith('image/')) {
+        return { data: null, error: { message: 'Evidence must be an image file.' } };
+    }
+    
+    const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB limit
+    if (file.size > MAX_SIZE_BYTES) {
+        return { data: null, error: { message: 'Evidence image must be 5MB or smaller.' } };
+    }
+    
+    const extension = file.name.split('.').pop()?.toLowerCase() || 'png';
+    const uniqueSuffix = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const path = `leaderboard-${leaderboardId}/match-${matchResultId || 'pending'}-${uniqueSuffix}.${extension}`;
+    
+    const { data, error } = await supabase.storage
+        .from(LEADERBOARD_EVIDENCE_BUCKET)
+        .upload(path, file, {
+            cacheControl: '3600',
+            contentType: file.type || 'image/png',
+            upsert: false
+        });
+    
+    if (error) {
+        return { data: null, error };
+    }
+    
+    const { data: publicData, error: publicError } = supabase
+        .storage
+        .from(LEADERBOARD_EVIDENCE_BUCKET)
+        .getPublicUrl(path);
+    
+    if (publicError) {
+        return { data: { path, publicUrl: null }, error: publicError };
+    }
+    
+    return {
+        data: {
+            path,
+            publicUrl: publicData?.publicUrl || null
+        },
+        error: null
+    };
+}
+
 // Add a score entry to a leaderboard
 // This creates a match_result with result_lines
-async function addLeaderboardEntry(leaderboardId, playerName, score) {
+async function addLeaderboardEntry(leaderboardId, playerName, score, evidenceFile = null) {
     const supabase = getSupabaseClient();
     if (!supabase) return { data: null, error: 'Supabase not initialized' };
     
@@ -232,7 +349,7 @@ async function addLeaderboardEntry(leaderboardId, playerName, score) {
     }
     
     // Create a match result
-    const { data: matchResult, error: matchError } = await supabase
+    const { data: initialMatchResult, error: matchError } = await supabase
         .from('match_result')
         .insert({
             leaderboard_id: leaderboardId,
@@ -243,6 +360,38 @@ async function addLeaderboardEntry(leaderboardId, playerName, score) {
         .single();
     
     if (matchError) return { data: null, error: matchError };
+    
+    let matchResult = initialMatchResult;
+    let uploadedEvidence = null;
+    
+    if (evidenceFile) {
+        const uploadResult = await uploadLeaderboardEvidence(leaderboardId, matchResult.id, evidenceFile);
+        if (uploadResult?.error) {
+            await supabase.from('match_result').delete().eq('id', matchResult.id);
+            return { data: null, error: uploadResult.error };
+        }
+        
+        uploadedEvidence = uploadResult?.data;
+        
+        if (uploadedEvidence?.publicUrl) {
+            const { data: updatedMatch, error: updateError } = await supabase
+                .from('match_result')
+                .update({ evidence_url: uploadedEvidence.publicUrl })
+                .eq('id', matchResult.id)
+                .select()
+                .single();
+            
+            if (updateError) {
+                if (uploadedEvidence?.path) {
+                    await supabase.storage.from(LEADERBOARD_EVIDENCE_BUCKET).remove([uploadedEvidence.path]);
+                }
+                await supabase.from('match_result').delete().eq('id', matchResult.id);
+                return { data: null, error: updateError };
+            }
+            
+            matchResult = updatedMatch;
+        }
+    }
     
     // Create result line with the score
     const { data: resultLine, error: lineError } = await supabase
@@ -259,17 +408,20 @@ async function addLeaderboardEntry(leaderboardId, playerName, score) {
     if (lineError) {
         // Clean up the match_result if result_line creation fails
         await supabase.from('match_result').delete().eq('id', matchResult.id);
+        if (uploadedEvidence?.path) {
+            await supabase.storage.from(LEADERBOARD_EVIDENCE_BUCKET).remove([uploadedEvidence.path]);
+        }
         return { data: null, error: lineError };
     }
     
-    return { data: { matchResult, resultLine }, error: null };
+    return { data: { matchResult, resultLine, evidence: uploadedEvidence }, error: null };
 }
 
 // Update a player's score in a leaderboard
-async function updateLeaderboardEntry(leaderboardId, playerName, newScore) {
+async function updateLeaderboardEntry(leaderboardId, playerName, newScore, evidenceFile = null) {
     // For now, we'll add a new entry (since the schema tracks history)
     // In the future, you might want to update the latest entry instead
-    return addLeaderboardEntry(leaderboardId, playerName, newScore);
+    return addLeaderboardEntry(leaderboardId, playerName, newScore, evidenceFile);
 }
 
 /**
@@ -308,4 +460,3 @@ window.Database = {
 };
 
 console.log('📦 Database.js loaded');
-
