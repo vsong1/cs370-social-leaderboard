@@ -33,6 +33,44 @@ const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey); // For verifyin
 
 console.log("✅ Supabase client initialized");
 
+// ==================== SQUAD INVITE CODE HELPERS ====================
+const INVITE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const INVITE_CODE_LENGTH = 12;
+const INVITE_CODE_GROUP = 4;
+const MAX_INVITE_ATTEMPTS = 12;
+
+function buildInviteCode() {
+    let raw = "";
+    for (let i = 0; i < INVITE_CODE_LENGTH; i++) {
+        const index = Math.floor(Math.random() * INVITE_ALPHABET.length);
+        raw += INVITE_ALPHABET[index];
+    }
+    // Chunk for readability, e.g. AAAA-BBBB-CCCC
+    return raw.match(new RegExp(`.{1,${INVITE_CODE_GROUP}}`, "g")).join("-");
+}
+
+async function generateUniqueInviteCode() {
+    for (let attempt = 0; attempt < MAX_INVITE_ATTEMPTS; attempt++) {
+        const candidate = buildInviteCode();
+        const { data, error } = await supabase
+            .from("squad")
+            .select("id")
+            .eq("invite_code", candidate)
+            .maybeSingle();
+
+        if (error && error.code !== "PGRST116") {
+            console.error("❌ Error checking invite code uniqueness:", error);
+            break;
+        }
+
+        if (!data) {
+            return candidate;
+        }
+    }
+
+    throw new Error("Unable to generate a unique invite code. Please try again.");
+}
+
 // ==================== AUTHENTICATION MIDDLEWARE ====================
 /**
  * Middleware to verify user authentication
@@ -394,16 +432,29 @@ app.post("/api/squads", authenticateUser, async (req, res) => {
             return res.status(400).json({ error: "Squad name is required" });
         }
 
-        // Check if invite code is already in use (if provided)
-        if (inviteCode) {
+        let normalizedInviteCode = inviteCode?.trim()?.toUpperCase() || null;
+
+        if (normalizedInviteCode) {
             const { data: existingSquad, error: checkError } = await supabase
                 .from("squad")
                 .select("id")
-                .eq("invite_code", inviteCode.trim().toUpperCase())
-                .single();
+                .eq("invite_code", normalizedInviteCode)
+                .maybeSingle();
+
+            if (checkError && checkError.code !== "PGRST116") {
+                console.error("❌ Error checking invite code:", checkError);
+                return res.status(500).json({ error: "Failed to verify invite code uniqueness" });
+            }
 
             if (existingSquad) {
                 return res.status(400).json({ error: "Invite code already in use" });
+            }
+        } else {
+            try {
+                normalizedInviteCode = await generateUniqueInviteCode();
+            } catch (generationError) {
+                console.error("❌ Error generating invite code:", generationError);
+                return res.status(500).json({ error: "Failed to generate invite code" });
             }
         }
 
@@ -415,7 +466,7 @@ app.post("/api/squads", authenticateUser, async (req, res) => {
                 description: description?.trim() || null,
                 game_title: gameTitle?.trim() || null,
                 skill_tier: skillTier?.trim() || null,
-                invite_code: inviteCode ? inviteCode.trim().toUpperCase() : null,
+                invite_code: normalizedInviteCode,
                 visibility: visibility || "private",
                 created_by: createdBy
             })

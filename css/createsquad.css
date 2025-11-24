@@ -199,6 +199,99 @@
     box-shadow: var(--bx-shadow);
 }
 
+.invite-code-banner {
+    padding: 1.5rem;
+    border-radius: 20px;
+    background: var(--bg-panel);
+    border: 1px solid rgba(var(--accent-green-rgb), 0.35);
+    box-shadow: var(--shadow-md);
+    display: grid;
+    gap: 0.5rem;
+}
+
+.invite-code-banner[hidden] {
+    display: none !important;
+}
+
+.invite-code-banner__content {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.invite-code-banner__text {
+    display: grid;
+    gap: 0.3rem;
+}
+
+.invite-code-label {
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(var(--text-primary-rgb), 0.6);
+}
+
+.invite-code-value {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    margin: 0;
+    color: var(--accent-green-strong);
+}
+
+.invite-code-help {
+    color: rgba(var(--text-primary-rgb), 0.75);
+    max-width: 36rem;
+}
+
+.invite-code-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.copy-invite-btn,
+.dismiss-invite-btn {
+    padding: 0.85rem 1.4rem;
+    border-radius: 999px;
+    border: none;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.copy-invite-btn {
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-green-strong));
+    color: var(--text-inverse);
+    border: 1px solid rgba(var(--accent-green-rgb), 0.5);
+}
+
+.dismiss-invite-btn {
+    background: var(--bg-elevated);
+    color: rgba(var(--text-primary-rgb), 0.85);
+    border: 1px solid var(--border-soft);
+}
+
+.copy-invite-btn:hover,
+.dismiss-invite-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--bx-shadow);
+}
+
+.copy-invite-btn:disabled,
+.dismiss-invite-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.invite-code-feedback {
+    font-size: 0.85rem;
+    color: var(--accent-green-strong);
+}
+
 .squad-card-header {
     display: flex;
     justify-content: space-between;

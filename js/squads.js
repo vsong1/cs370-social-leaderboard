@@ -46,7 +46,12 @@ const selectors = {
     emptyState: document.querySelector('[data-empty-state]'),
     joinForm: document.getElementById('join-squad-form'),
     joinError: document.querySelector('[data-join-error]'),
-    joinFeedback: document.querySelector('[data-join-feedback]')
+    joinFeedback: document.querySelector('[data-join-feedback]'),
+    inviteBanner: document.querySelector('[data-invite-banner]'),
+    inviteCodeValue: document.querySelector('[data-invite-code]'),
+    copyInviteButton: document.querySelector('[data-copy-invite]'),
+    copyInviteFeedback: document.querySelector('[data-copy-feedback]'),
+    inviteDismissButton: document.querySelector('[data-dismiss-invite]')
 };
 
 const squadState = {
@@ -147,6 +152,7 @@ const showJoinError = (message) => {
 const clearJoinError = () => showJoinError('');
 
 let joinFeedbackTimer;
+let inviteCopyTimer;
 
 const showJoinFeedback = (message) => {
     if (!selectors.joinFeedback) {
@@ -162,6 +168,44 @@ const showJoinFeedback = (message) => {
             selectors.joinFeedback.hidden = true;
         }, 3000);
     }
+};
+
+const setCopyInviteFeedback = (message) => {
+    if (!selectors.copyInviteFeedback) {
+        return;
+    }
+    selectors.copyInviteFeedback.textContent = message;
+    selectors.copyInviteFeedback.hidden = !message;
+    if (inviteCopyTimer) {
+        clearTimeout(inviteCopyTimer);
+    }
+    if (message) {
+        inviteCopyTimer = setTimeout(() => {
+            selectors.copyInviteFeedback.hidden = true;
+        }, 2500);
+    }
+};
+
+const hideInviteSuccess = () => {
+    if (selectors.inviteBanner) {
+        selectors.inviteBanner.hidden = true;
+    }
+};
+
+const showInviteSuccess = (inviteCode) => {
+    if (selectors.inviteBanner && selectors.inviteCodeValue) {
+        selectors.inviteCodeValue.textContent = inviteCode || 'N/A';
+        selectors.inviteBanner.hidden = false;
+        selectors.inviteBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setCopyInviteFeedback('');
+        return true;
+    }
+
+    const fallbackMessage = inviteCode
+        ? `Squad created! Invite code: ${inviteCode}`
+        : 'Squad created!';
+    alert(fallbackMessage);
+    return false;
 };
 
 const ensureListVisibility = () => {
@@ -253,14 +297,8 @@ const handleCreateSubmit = async (event) => {
     const trimmedName = nextRecord.squad_name.trim();
     const trimmedGame = nextRecord.game_title.trim();
     const trimmedTier = (nextRecord.skill_tier || '').trim();
-    const trimmedInvite = (nextRecord.invite_code || '').trim();
     const trimmedDescription = (nextRecord.description || '').trim();
     const visibility = nextRecord.visibility;
-
-    if (visibility === 'private' && !trimmedInvite) {
-        showError('Private squads require an invite code.');
-        return;
-    }
 
     clearError();
 
@@ -279,7 +317,6 @@ const handleCreateSubmit = async (event) => {
             game_title: trimmedGame,
             skill_tier: trimmedTier || null,
             visibility: visibility || 'public',
-            invite_code: trimmedInvite || null,
             description: trimmedDescription || null
         });
 
@@ -295,16 +332,20 @@ const handleCreateSubmit = async (event) => {
         // Success - reset form and close panel
         selectors.form.reset();
         togglePanel(false);
-        
-        // Reload squads to show the new one
-        // For createsquad.html, we'll reload the page to refresh the list
-        // For chat.html, it will auto-refresh when navigated to
+
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+        }
+
+        const handled = showInviteSuccess(squad.invite_code);
+        if (handled) {
+            return;
+        }
+
+        // If the invite banner isn't available, fall back to prior behavior
         if (window.location.pathname.includes('createsquad.html')) {
-            // Reload the page to show the new squad in the list
             window.location.reload();
-        } else {
-            // If we're on a different page, just show success
-            alert('Squad created successfully!');
         }
 
     } catch (error) {
@@ -387,56 +428,97 @@ const handleToggle = () => {
 
 const handleCancel = () => togglePanel(false);
 
-const init = async () => {
-    if (!selectors.list) {
+const handleCopyInvite = async () => {
+    const code = selectors.inviteCodeValue?.textContent?.trim();
+    if (!code) {
         return;
     }
 
-    // Wait for auth and database to initialize
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Load squads from database instead of localStorage
     try {
-        const { data: squads, error } = await window.Database?.getUserSquads();
-        
-        if (error) {
-            console.error('Error loading squads:', error);
-            // Fall back to localStorage if database fails
-            squadState.directory = readDirectory();
-            squadState.records = readUserRecords();
-        } else if (squads && squads.length > 0) {
-            // Convert database squads to the format expected by renderSquads
-            squadState.records = squads.map(squad => ({
-                id: squad.id,
-                squad_name: squad.name,
-                game_title: squad.game_title,
-                skill_tier: squad.skill_tier,
-                visibility: squad.visibility,
-                invite_code: squad.invite_code,
-                description: squad.description,
-                created_at: squad.created_at,
-                membership: squad.membershipRole || 'member',
-                owner: squad.created_by
-            }));
-            squadState.directory = [...squadState.records];
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(code);
         } else {
-            // No squads in database, check localStorage as fallback
+            const tempInput = document.createElement('input');
+            tempInput.value = code;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+        }
+        setCopyInviteFeedback('Copied to clipboard');
+    } catch (error) {
+        console.error('Failed to copy invite code:', error);
+        setCopyInviteFeedback('Copy failed. Try again.');
+    }
+};
+
+const handleInviteDismiss = () => {
+    hideInviteSuccess();
+    if (window.location.pathname.includes('createsquad.html')) {
+        window.location.reload();
+    }
+};
+
+const init = async () => {
+    const hasListView = Boolean(selectors.list);
+    const hasJoinForm = Boolean(selectors.joinForm);
+
+    if (!hasListView && !hasJoinForm) {
+        return;
+    }
+
+    if (hasListView) {
+        // Wait for auth and database to initialize
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Load squads from database instead of localStorage
+        try {
+            const { data: squads, error } = await window.Database?.getUserSquads();
+            
+            if (error) {
+                console.error('Error loading squads:', error);
+                // Fall back to localStorage if database fails
+                squadState.directory = readDirectory();
+                squadState.records = readUserRecords();
+            } else if (squads && squads.length > 0) {
+                // Convert database squads to the format expected by renderSquads
+                squadState.records = squads.map(squad => ({
+                    id: squad.id,
+                    squad_name: squad.name,
+                    game_title: squad.game_title,
+                    skill_tier: squad.skill_tier,
+                    visibility: squad.visibility,
+                    invite_code: squad.invite_code,
+                    description: squad.description,
+                    created_at: squad.created_at,
+                    membership: squad.membershipRole || 'member',
+                    owner: squad.created_by
+                }));
+                squadState.directory = [...squadState.records];
+            } else {
+                // No squads in database, check localStorage as fallback
+                squadState.directory = readDirectory();
+                squadState.records = readUserRecords();
+            }
+        } catch (error) {
+            console.error('Unexpected error loading squads:', error);
+            // Fall back to localStorage
             squadState.directory = readDirectory();
             squadState.records = readUserRecords();
         }
-    } catch (error) {
-        console.error('Unexpected error loading squads:', error);
-        // Fall back to localStorage
-        squadState.directory = readDirectory();
-        squadState.records = readUserRecords();
+
+        renderSquads();
+
+        selectors.toggle?.addEventListener('click', handleToggle);
+        selectors.form?.addEventListener('submit', handleCreateSubmit);
+        selectors.form?.querySelector('[data-action="cancel"]')?.addEventListener('click', handleCancel);
+        selectors.copyInviteButton?.addEventListener('click', handleCopyInvite);
+        selectors.inviteDismissButton?.addEventListener('click', handleInviteDismiss);
     }
 
-    renderSquads();
-
-    selectors.toggle?.addEventListener('click', handleToggle);
-    selectors.form?.addEventListener('submit', handleCreateSubmit);
-    selectors.form?.querySelector('[data-action="cancel"]')?.addEventListener('click', handleCancel);
-    selectors.joinForm?.addEventListener('submit', handleJoinSubmit);
+    if (hasJoinForm) {
+        selectors.joinForm.addEventListener('submit', handleJoinSubmit);
+    }
 };
 
 document.addEventListener('DOMContentLoaded', init);

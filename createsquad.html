@@ -67,10 +67,6 @@
                     </select>
                 </div>
                 <div class="form-field">
-                    <label for="invite-code">Invite Code (optional)</label>
-                    <input id="invite-code" name="invite_code" maxlength="12" autocomplete="off" placeholder="Set a code for private squads">
-                </div>
-                <div class="form-field">
                     <label for="squad-description">Description</label>
                     <textarea id="squad-description" name="description" maxlength="200" placeholder="Share your squad's focus or goals"></textarea>
                 </div>
@@ -80,6 +76,21 @@
                     <button type="submit" class="form-submit">Create Squad</button>
                 </div>
             </form>
+        </section>
+
+        <section class="invite-code-banner" data-invite-banner hidden aria-live="polite">
+            <div class="invite-code-banner__content">
+                <div class="invite-code-banner__text">
+                    <p class="invite-code-label">Squad created!</p>
+                    <h2 class="invite-code-value" data-invite-code>XXXX-XXXX</h2>
+                    <p class="invite-code-help">Share this code with teammates so they can join from the Join Squad page.</p>
+                </div>
+                <div class="invite-code-actions">
+                    <button type="button" class="copy-invite-btn" data-copy-invite>Copy Code</button>
+                    <button type="button" class="dismiss-invite-btn" data-dismiss-invite>Done</button>
+                </div>
+            </div>
+            <p class="invite-code-feedback" data-copy-feedback hidden>Copied to clipboard</p>
         </section>
 
         <section class="squad-list" data-squad-list>
@@ -102,4 +113,3 @@
 
 </body>
 </html>
-

@@ -23,9 +23,48 @@ function getSupabaseClient() {
 async function getCurrentUserId() {
     const supabase = getSupabaseClient();
     if (!supabase) return null;
-    
+
     const { data: { user } } = await supabase.auth.getUser();
     return user?.id || null;
+}
+
+/**
+ * INVITE CODE HELPERS
+ */
+const INVITE_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const INVITE_CODE_LENGTH = 12;
+const INVITE_CODE_GROUP = 4;
+const INVITE_CODE_ATTEMPTS = 12;
+
+function buildInviteCodeString() {
+    let raw = '';
+    for (let i = 0; i < INVITE_CODE_LENGTH; i++) {
+        const index = Math.floor(Math.random() * INVITE_CODE_ALPHABET.length);
+        raw += INVITE_CODE_ALPHABET[index];
+    }
+    return raw.match(new RegExp(`.{1,${INVITE_CODE_GROUP}}`, 'g')).join('-');
+}
+
+async function getUniqueInviteCode(supabase) {
+    for (let attempt = 0; attempt < INVITE_CODE_ATTEMPTS; attempt++) {
+        const candidate = buildInviteCodeString();
+        const { data, error } = await supabase
+            .from('squad')
+            .select('id')
+            .eq('invite_code', candidate)
+            .limit(1);
+
+        if (error) {
+            console.error('❌ Error checking invite code uniqueness:', error);
+            break;
+        }
+
+        if (!data || data.length === 0) {
+            return candidate;
+        }
+    }
+
+    throw new Error('Failed to generate unique invite code. Please try again.');
 }
 
 /**
@@ -562,7 +601,7 @@ async function createSquad(squadData) {
     const userId = await getCurrentUserId();
     if (!userId) return { data: null, error: 'User not logged in' };
     
-    const { name, game_title, skill_tier, visibility, invite_code, description } = squadData;
+    const { name, game_title, skill_tier, visibility, description } = squadData;
     
     // Validate required fields
     if (!name || !game_title) {
@@ -585,22 +624,11 @@ async function createSquad(squadData) {
         return { data: null, error: 'A squad with this name already exists' };
     }
     
-    // Check if invite code is already in use (if provided)
-    if (invite_code && invite_code.trim()) {
-        const { data: codeInUse, error: codeError } = await supabase
-            .from('squad')
-            .select('id')
-            .eq('invite_code', invite_code.trim().toUpperCase())
-            .limit(1)
-            .single();
-        
-        if (codeError && codeError.code !== 'PGRST116') {
-            return { data: null, error: codeError };
-        }
-        
-        if (codeInUse) {
-            return { data: null, error: 'This invite code is already in use' };
-        }
+    let generatedInviteCode;
+    try {
+        generatedInviteCode = await getUniqueInviteCode(supabase);
+    } catch (error) {
+        return { data: null, error };
     }
     
     // Create the squad
@@ -609,7 +637,7 @@ async function createSquad(squadData) {
         game_title: game_title.trim(),
         skill_tier: skill_tier?.trim() || null,
         visibility: visibility || 'public',
-        invite_code: invite_code?.trim().toUpperCase() || null,
+        invite_code: generatedInviteCode,
         description: description?.trim() || null,
         created_by: userId
     };
