@@ -31,7 +31,7 @@
             </button>
 
             <div class="nav-links">
-                <!-- <a href="index.html" class="nav-link">Home</a> -->
+                <a href="index.html" class="nav-link">Home</a>
                 <a href="all-leaderboards.html" class="nav-link">Leaderboards</a>
                 <a href="all-squads.html" class="nav-link active">My Squads</a>
                 <a href="profile.html" class="nav-link">Profile</a>
@@ -75,8 +75,12 @@
                             <!-- Example Members -->
                             <li class="member-item">
                                 <span class="member-name">Georgia (You)</span>
-                                <button type="button" class="remove-member-btn" disabled
-                                    title="You can’t remove yourself">Remove</button>
+                                <div class="member-buttons">
+                                    <button type="button" class="demote-owner-btn" disabled
+                                    title="This member is an owner and cannot be removed.">Remove</button>
+                                    <button type="button" class="remove-member-btn" disabled
+                                    title="This member is an owner and cannot be removed.">Remove</button>
+                                </div>
                             </li>
                         </ul>
                         <div class="add-member">
