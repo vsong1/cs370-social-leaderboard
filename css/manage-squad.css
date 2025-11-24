@@ -152,6 +152,28 @@ textarea {
     cursor: not-allowed;
 }
 
+.promote-owner-btn {
+    background: var(--accent-blue);
+    color: var(--text-inverse);
+    border: none;
+    border-radius: 6px;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+
+.demote-owner-btn {
+    background: var(--accent-orange);
+    color: var(--text-inverse);
+    border: none;
+    border-radius: 6px;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+
 .add-member {
     display: flex;
     flex-direction: row;
