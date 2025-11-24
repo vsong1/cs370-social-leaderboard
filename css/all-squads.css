@@ -94,18 +94,50 @@
 .squad-info {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+.squad-header {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .squad-name {
-    min-width: 25%;
     font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.2;
 }
 
 .squad-members {
-    min-width: 20%;
-    font-family: 'Orbitron', monospace;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-secondary, rgba(245, 241, 237, 0.8));
+    margin: 0;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.squad-description {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-secondary, rgba(245, 241, 237, 0.6));
+    margin: 0.5rem 0 0 0;
+    line-height: 1.4;
+    font-style: italic;
+}
+
+.squad-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 120px;
 }
 
 .manage-btn {
@@ -114,16 +146,24 @@
     background-color: var(--bg-elevated);
     color: var(--accent-blue);
     font-family: 'Orbitron', monospace;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    white-space: nowrap;
+}
+
+.manage-btn:hover {
+    background: var(--accent-blue);
+    color: var(--text-inverse);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .chat-btn {
@@ -132,16 +172,24 @@
     background-color: var(--bg-elevated);
     color: var(--accent-green);
     font-family: 'Orbitron', monospace;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    white-space: nowrap;
+}
+
+.chat-btn:hover {
+    background: var(--accent-green);
+    color: var(--text-inverse);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .shortlb-list {

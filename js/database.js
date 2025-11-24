@@ -699,6 +699,38 @@ async function joinSquadByInviteCode(inviteCode) {
     return { data: { squad, membership }, error: null };
 }
 
+// Get leaderboards for a specific squad
+async function getSquadLeaderboards(squadId) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const userId = await getCurrentUserId();
+    if (!userId) return { data: null, error: 'User not logged in' };
+    
+    // Verify user is a member of the squad
+    const { data: userMembership, error: checkError } = await supabase
+        .from('squad_membership')
+        .select('id')
+        .eq('squad_id', squadId)
+        .eq('user_id', userId)
+        .single();
+    
+    if (checkError || !userMembership) {
+        return { data: null, error: 'You are not a member of this squad' };
+    }
+    
+    // Get all leaderboards for this squad
+    const { data: leaderboards, error: leaderboardsError } = await supabase
+        .from('leaderboard')
+        .select('id, name, game_name, status, created_at')
+        .eq('squad_id', squadId)
+        .order('created_at', { ascending: false });
+    
+    if (leaderboardsError) return { data: null, error: leaderboardsError };
+    
+    return { data: leaderboards || [], error: null };
+}
+
 // Export functions to window for use in other scripts
 window.Database = {
     getSupabaseClient,
@@ -715,7 +747,8 @@ window.Database = {
     getSquadMemberCount,
     getSquadMembers,
     createSquad,
-    joinSquadByInviteCode
+    joinSquadByInviteCode,
+    getSquadLeaderboards
 };
 
 console.log('📦 Database.js loaded');

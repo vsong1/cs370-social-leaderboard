@@ -49,20 +49,11 @@
                 </div>
             </div>
             
-            <div class="squads-list">
-                <div class="squad-card">
-                    <div class="squad-info">
-                        <h3 class="squad-name">Top Squad</h3>
-                        <p class="squad-members">10 friends</p>
-                        <button class="manage-btn" onclick="window.location.href='managesquad.html'">Manage</button>
-                        <button class="chat-btn" onclick="window.location.href='chat.html'">Open Chat</button>
-                    </div>
-                    <div class="shortlb-list">
-                        <div class="shortlb-tile" style="background:rgb(167,242,182,0.5);" onclick="window.location.href='leaderboard.html'"><p>Foosball Friends</p></div>
-                        <div class="shortlb-tile" style="background:rgb(251,139,36,0.5);" onclick="window.location.href='leaderboard.html'"><p>Valorant Legends</p></div>
-                        <div class="shortlb-tile" style="background:rgb(167,242,182,0.5);" onclick="window.location.href='leaderboard.html'"><p>CS:GO Allstars</p></div>
-                        <div class="shortlb-tile" onclick="window.location.href='create-leaderboard.html'"><p class="shortlb-new">+ New Leaderboard</p></div>
-                    </div>
+            <div class="squads-list" id="squads-list">
+                <!-- Squads will be loaded dynamically here -->
+                <div class="empty-state" id="empty-state" style="display: none;">
+                    <p>You're not part of any squads yet.</p>
+                    <p>Create or join a squad to get started!</p>
                 </div>
             </div>
         </div>
@@ -76,6 +67,7 @@
     <script src="js/database.js"></script>
     <!-- Site Scripts -->
     <script src="js/script.js"></script>
+    <script src="js/all-squads.js"></script>
     <script src="js/theme-toggle.js"></script>
     <script src="js/burger-menu.js"></script>
 
