@@ -1,6 +1,9 @@
 // All Squads page functionality
 // Loads and displays user's squads from the database
 
+let isLoadingSquads = false;
+let eventListenersAttached = false;
+
 // Wait for auth and database to be ready
 async function initializeAllSquads() {
     // Wait for auth to initialize
@@ -17,25 +20,41 @@ async function initializeAllSquads() {
     // Load squads
     await loadSquads();
     
-    // Listen for visibility change to reload squads when user returns to the page
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-            loadSquads();
-        }
-    });
-    
-    // Also reload when page gains focus
-    window.addEventListener('focus', () => {
-        loadSquads();
-    });
+    // Only attach event listeners once
+    if (!eventListenersAttached) {
+        // Listen for visibility change to reload squads when user returns to the page
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && !isLoadingSquads) {
+                loadSquads();
+            }
+        });
+        
+        // Also reload when page gains focus
+        window.addEventListener('focus', () => {
+            if (!isLoadingSquads) {
+                loadSquads();
+            }
+        });
+        
+        eventListenersAttached = true;
+    }
 }
 
 // Load squads from database and display them
 async function loadSquads() {
+    // Prevent multiple simultaneous loads
+    if (isLoadingSquads) {
+        return;
+    }
+    
+    isLoadingSquads = true;
     const squadsList = document.getElementById('squads-list');
     const emptyState = document.getElementById('empty-state');
     
-    if (!squadsList) return;
+    if (!squadsList) {
+        isLoadingSquads = false;
+        return;
+    }
     
     try {
         const { data: squads, error } = await window.Database.getUserSquads();
@@ -46,10 +65,22 @@ async function loadSquads() {
                 emptyState.style.display = 'block';
                 emptyState.innerHTML = '<p>Error loading squads. Please refresh the page.</p>';
             }
+            isLoadingSquads = false;
             return;
         }
         
-        // Clear existing squad cards
+        // Clear existing squad cards more thoroughly
+        // Remove all children except the empty state
+        while (squadsList.firstChild) {
+            const child = squadsList.firstChild;
+            if (child.id !== 'empty-state') {
+                squadsList.removeChild(child);
+            } else {
+                break; // Keep empty state
+            }
+        }
+        
+        // Also clear by class name as backup
         const existingCards = squadsList.querySelectorAll('.squad-card');
         existingCards.forEach(card => card.remove());
         
@@ -58,6 +89,7 @@ async function loadSquads() {
             if (emptyState) {
                 emptyState.style.display = 'block';
             }
+            isLoadingSquads = false;
             return;
         }
         
@@ -91,6 +123,8 @@ async function loadSquads() {
             emptyState.style.display = 'block';
             emptyState.innerHTML = '<p>Error loading squads. Please refresh the page.</p>';
         }
+    } finally {
+        isLoadingSquads = false;
     }
 }
 
