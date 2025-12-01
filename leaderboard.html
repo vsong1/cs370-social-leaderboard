@@ -38,8 +38,8 @@
                     &lt; Back to Leaderboards
                 </a>
                 <div class="leaderboard-title-section">
-                    <h1 class="leaderboard-title">Foosball Friends</h1>
-                    <button class="squad-chat-button" onclick="openSquadChat()">
+                    <h1 class="leaderboard-title" id="leaderboard-title">Loading...</h1>
+                    <button class="squad-chat-button" id="squad-chat-button" style="display: none;" onclick="openSquadChat()">
                         <span>OPEN SQUAD</span>
                         <span>CHAT</span>
                     </button>
@@ -58,7 +58,9 @@
                 <form class="leaderboard-add-score-form" id="leaderboard-add-score-form" novalidate>
                     <div class="form-field">
                         <label for="add-score-name">Player Name</label>
-                        <input id="add-score-name" name="player_name" required maxlength="40" placeholder="Enter player name">
+                        <select id="add-score-name" name="player_name" required>
+                            <option value="">Select a player...</option>
+                        </select>
                     </div>
                     <div class="form-field">
                         <label for="add-score-value">Score</label>

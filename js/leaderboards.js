@@ -28,6 +28,9 @@ function openSquadChat() {
     window.location.href = 'chat.html';
 }
 
+// Store current leaderboard data globally
+let currentLeaderboardData = null;
+
 // Search functionality for leaderboard
 function initializeLeaderboardSearch() {
     const searchInput = document.getElementById('leaderboard-search');
@@ -157,7 +160,7 @@ async function loadAllLeaderboards() {
                 <p class="leaderboard-members">${memberText}</p>
             </div>
             <div class="leaderboard-actions">
-                <button class="view-leaderboard-btn" onclick="window.location.href='leaderboard.html?id=${leaderboard.id}'">View</button>
+                <button class="view-leaderboard-btn" onclick="window.location.href='leaderboard.html?leaderboard_id=${leaderboard.id}'">View</button>
             </div>
         `;
         
@@ -182,38 +185,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Leaderboard view, adding scores functionality - NOW USING SUPABASE!
 (function leaderboardPersistence() {
-    // Get leaderboard ID from URL, data attribute, or by name
+    // Get leaderboard ID from URL
     const getLeaderboardId = async () => {
-        // Try to get from URL parameter
         const urlParams = new URLSearchParams(window.location.search);
-        const idFromUrl = urlParams.get('id');
-        if (idFromUrl) return parseInt(idFromUrl);
-        
-        // Try to get from data attribute on the page
-        const leaderboardElement = document.querySelector('[data-leaderboard-id]');
-        if (leaderboardElement) {
-            return parseInt(leaderboardElement.getAttribute('data-leaderboard-id'));
+        // Check for both 'id' and 'leaderboard_id' parameters
+        const idFromUrl = urlParams.get('leaderboard_id') || urlParams.get('id');
+        if (idFromUrl) {
+            return idFromUrl; // Keep as string, Supabase uses UUIDs
         }
-        
-        // Try to find by name from the page title
-        const titleElement = document.querySelector('.leaderboard-title');
-        if (titleElement && window.Database) {
-            const leaderboardName = titleElement.textContent?.trim();
-            if (leaderboardName) {
-                try {
-                    const { data, error } = await window.Database.findLeaderboardByName(leaderboardName);
-                    if (!error && data) {
-                        console.log('✅ Found leaderboard by name:', data.id);
-                        return data.id;
-                    }
-                } catch (err) {
-                    console.warn('⚠️ Could not find leaderboard by name:', err);
-                }
-            }
-        }
-        
-        // For now, return null - we'll need to create or find the leaderboard
-        // This is a temporary solution until we have proper leaderboard routing
         return null;
     };
 
@@ -481,7 +460,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const scoreValue = (formData.get('score') || '').trim();
 
         if (!name || !scoreValue) {
-            showError('Please enter both player name and score.');
+            showError('Please select a player and enter a score.');
             return;
         }
 
@@ -549,51 +528,158 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 
 
+// Populate player dropdown with squad members
+async function populatePlayerDropdown(squadId) {
+    const playerSelect = document.getElementById('add-score-name');
+    if (!playerSelect || !squadId) return;
+    
+    // Clear existing options except the first one
+    playerSelect.innerHTML = '<option value="">Select a player...</option>';
+    
+    if (!window.Database) {
+        console.error('Database not available');
+        return;
+    }
+    
+    try {
+        const { data: members, error } = await window.Database.getSquadMembers(squadId);
+        
+        if (error) {
+            console.error('Error loading squad members:', error);
+            return;
+        }
+        
+        if (!members || members.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No members found';
+            option.disabled = true;
+            playerSelect.appendChild(option);
+            return;
+        }
+        
+        // Add each member as an option
+        members.forEach(member => {
+            const option = document.createElement('option');
+            option.value = member.username; // Use username as value
+            option.textContent = member.username;
+            playerSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating player dropdown:', error);
+    }
+}
+
 // Leaderboard view, load data from Supabase
 async function loadLeaderboard() {
     const list = document.querySelector('.leaderboard-list');
+    const titleEl = document.getElementById('leaderboard-title');
+    const chatButton = document.getElementById('squad-chat-button');
+    
     if (!list) return;
 
     // Show loading state
     list.innerHTML = '<div style="text-align: center; padding: 2rem; color: #888;">Loading leaderboard...</div>';
+    if (titleEl) titleEl.textContent = 'Loading...';
 
-    // Wait a bit for Supabase to initialize
+    // Wait for Supabase to initialize
     let attempts = 0;
     while (!window.Database && attempts < 50) {
         await new Promise(resolve => setTimeout(resolve, 100));
         attempts++;
     }
 
+    if (!window.Database) {
+        list.innerHTML = '<div style="text-align: center; padding: 2rem; color: #ff6b6b;">Error: Database not loaded</div>';
+        return;
+    }
+
+    // Get leaderboard ID
+    const leaderboardId = await window._leaderboardStore?.getLeaderboardId();
+    
+    if (!leaderboardId) {
+        list.innerHTML = '<div style="text-align: center; padding: 2rem; color: #ff6b6b;">No leaderboard specified</div>';
+        if (titleEl) titleEl.textContent = 'Leaderboard Not Found';
+        return;
+    }
+
+    // Load leaderboard details
+    try {
+        const { data: leaderboard, error: lbError } = await window.Database.getLeaderboard(leaderboardId);
+        
+        if (lbError || !leaderboard) {
+            list.innerHTML = '<div style="text-align: center; padding: 2rem; color: #ff6b6b;">Leaderboard not found</div>';
+            if (titleEl) titleEl.textContent = 'Leaderboard Not Found';
+            return;
+        }
+        
+        currentLeaderboardData = leaderboard;
+        
+        // Update title
+        if (titleEl) {
+            titleEl.textContent = leaderboard.name || 'Unnamed Leaderboard';
+        }
+        
+        // Show squad chat button if leaderboard has a squad
+        if (leaderboard.squad_id && chatButton) {
+            chatButton.style.display = 'block';
+            chatButton.onclick = () => {
+                window.location.href = `chat.html`;
+            };
+        }
+        
+        // Populate player dropdown with squad members if leaderboard has a squad
+        const playerSelect = document.getElementById('add-score-name');
+        if (leaderboard.squad_id) {
+            await populatePlayerDropdown(leaderboard.squad_id);
+        } else if (playerSelect) {
+            // If no squad, disable the dropdown and show a message
+            playerSelect.innerHTML = '<option value="" disabled>No squad associated with this leaderboard</option>';
+            playerSelect.disabled = true;
+        }
+        
+    } catch (error) {
+        console.error('Error loading leaderboard details:', error);
+    }
+
     // Load entries from Supabase
     const saved = await window._leaderboardStore?.readSavedEntries() || [];
     
-    // If no entries found, show placeholder data (but don't save it)
-    const leaderboardData = saved.length > 0 ? saved.map((s, idx) => ({
-        rank: idx + 1,
-        name: s.name,
-        points: Number(s.points || 0)
-    })) : [
-        { rank: 1, name: 'Player123', points: 10 },
-        { rank: 2, name: 'Georgia', points: 9 },
-        { rank: 3, name: 'De', points: 7 },
-        { rank: 4, name: 'Kevin', points: 7 },
-        { rank: 5, name: 'Triangle', points: 3 },
-        { rank: 6, name: 'Jim', points: 1 }
-    ];
-
     // Clear loading message
     list.innerHTML = '';
 
-    leaderboardData.forEach((entry) => {
+    if (saved.length === 0) {
+        list.innerHTML = '<div style="text-align: center; padding: 2rem; color: #888;">No scores yet. Be the first to add one!</div>';
+        return;
+    }
+
+    // Sort by score (descending) and assign ranks
+    const sorted = saved
+        .map(entry => ({
+            name: entry.name,
+            points: Number(entry.points || 0)
+        }))
+        .sort((a, b) => b.points - a.points);
+
+    let currentRank = 1;
+    let lastScore = null;
+
+    sorted.forEach((entry, index) => {
+        // Handle ties - same rank for same score
+        if (entry.points !== lastScore) {
+            currentRank = index + 1;
+            lastScore = entry.points;
+        }
+
         const div = document.createElement('div');
         let rankClass = 'rank-default';
-        if (entry.rank === 1) rankClass = 'rank-1';
-        else if (entry.rank === 2) rankClass = 'rank-2';
-        else if (entry.rank === 3) rankClass = 'rank-3';
+        if (currentRank === 1) rankClass = 'rank-1';
+        else if (currentRank === 2) rankClass = 'rank-2';
+        else if (currentRank === 3) rankClass = 'rank-3';
 
         div.className = `leaderboard-entry ${rankClass}`;
         div.innerHTML = `
-            <span class="rank">#${entry.rank}</span>
+            <span class="rank">#${currentRank}</span>
             <span class="player-name">${entry.name}</span>
             <span class="points">${entry.points} points</span>
         `;

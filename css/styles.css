@@ -1176,16 +1176,20 @@ body[data-auth-state="signed-in"] .nav-links a[href="index.html"] {
     color: rgba(var(--text-primary-rgb), 0.7);
 }
 
-.leaderboard-add-score-form input {
+.leaderboard-add-score-form input,
+.leaderboard-add-score-form select {
     padding: 0.85rem 1rem;
     border-radius: 12px;
     border: 1px solid var(--input-border);
     background: var(--bg-input);
     color: var(--text-primary);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-family: inherit;
+    font-size: inherit;
 }
 
-.leaderboard-add-score-form input:focus {
+.leaderboard-add-score-form input:focus,
+.leaderboard-add-score-form select:focus {
     outline: none;
     border-color: var(--accent-green);
     box-shadow: var(--input-focus-ring);
