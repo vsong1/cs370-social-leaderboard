@@ -869,6 +869,161 @@ async function getSquadLeaderboards(squadId) {
     return { data: leaderboards || [], error: null };
 }
 
+/**
+ * CHAT FUNCTIONS
+ */
+
+// Get or create a squad chat room for a squad
+async function getOrCreateSquadChatRoom(squadId) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const userId = await getCurrentUserId();
+    if (!userId) return { data: null, error: 'User not logged in' };
+    
+    // Verify user is a member of the squad
+    const { data: userMembership, error: checkError } = await supabase
+        .from('squad_membership')
+        .select('id')
+        .eq('squad_id', squadId)
+        .eq('user_id', userId)
+        .single();
+    
+    if (checkError || !userMembership) {
+        return { data: null, error: 'You are not a member of this squad' };
+    }
+    
+    // Try to get existing chat room
+    const { data: existingRoom, error: fetchError } = await supabase
+        .from('squad_chat_room')
+        .select('id')
+        .eq('squad_id', squadId)
+        .single();
+    
+    if (existingRoom) {
+        return { data: existingRoom, error: null };
+    }
+    
+    // If not found and error is "not found", create a new one
+    if (fetchError && fetchError.code === 'PGRST116') {
+        const { data: newRoom, error: createError } = await supabase
+            .from('squad_chat_room')
+            .insert({ squad_id: squadId })
+            .select()
+            .single();
+        
+        if (createError) {
+            return { data: null, error: createError };
+        }
+        
+        return { data: newRoom, error: null };
+    }
+    
+    // Other errors
+    return { data: null, error: fetchError };
+}
+
+// Send a message to a squad chat
+async function sendSquadMessage(squadId, messageBody) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const userId = await getCurrentUserId();
+    if (!userId) return { data: null, error: 'User not logged in' };
+    
+    if (!messageBody || !messageBody.trim()) {
+        return { data: null, error: 'Message body is required' };
+    }
+    
+    // Get or create chat room
+    const { data: chatRoom, error: roomError } = await getOrCreateSquadChatRoom(squadId);
+    if (roomError || !chatRoom) {
+        return { data: null, error: roomError || 'Failed to get chat room' };
+    }
+    
+    // Insert message
+    const { data: message, error: messageError } = await supabase
+        .from('chat_message')
+        .insert({
+            user_id: userId,
+            squad_chat_id: chatRoom.id,
+            body: messageBody.trim()
+        })
+        .select(`
+            id,
+            user_id,
+            body,
+            created_at,
+            user:user_id (
+                id,
+                username,
+                email,
+                first_name,
+                last_name
+            )
+        `)
+        .single();
+    
+    if (messageError) {
+        return { data: null, error: messageError };
+    }
+    
+    return { data: message, error: null };
+}
+
+// Get messages for a squad chat
+async function getSquadMessages(squadId, limit = 100) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const userId = await getCurrentUserId();
+    if (!userId) return { data: null, error: 'User not logged in' };
+    
+    // Verify user is a member of the squad
+    const { data: userMembership, error: checkError } = await supabase
+        .from('squad_membership')
+        .select('id')
+        .eq('squad_id', squadId)
+        .eq('user_id', userId)
+        .single();
+    
+    if (checkError || !userMembership) {
+        return { data: null, error: 'You are not a member of this squad' };
+    }
+    
+    // Get chat room
+    const { data: chatRoom, error: roomError } = await getOrCreateSquadChatRoom(squadId);
+    if (roomError || !chatRoom) {
+        return { data: null, error: roomError || 'Failed to get chat room' };
+    }
+    
+    // Get messages
+    const { data: messages, error: messagesError } = await supabase
+        .from('chat_message')
+        .select(`
+            id,
+            user_id,
+            body,
+            created_at,
+            user:user_id (
+                id,
+                username,
+                email,
+                first_name,
+                last_name
+            )
+        `)
+        .eq('squad_chat_id', chatRoom.id)
+        .order('created_at', { ascending: true })
+        .limit(limit);
+    
+    if (messagesError) {
+        return { data: null, error: messagesError };
+    }
+    
+    return { data: messages || [], error: null };
+}
+
 // Export functions to window for use in other scripts
 window.Database = {
     getSupabaseClient,
@@ -889,7 +1044,10 @@ window.Database = {
     deleteSquad,
     createSquad,
     joinSquadByInviteCode,
-    getSquadLeaderboards
+    getSquadLeaderboards,
+    getOrCreateSquadChatRoom,
+    sendSquadMessage,
+    getSquadMessages
 };
 
 console.log('📦 Database.js loaded');

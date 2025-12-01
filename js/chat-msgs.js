@@ -1,6 +1,8 @@
 // Chat messages and squad management
 let currentSquadId = null;
 let squads = [];
+let chatRoomId = null;
+let messageSubscription = null;
 
 // Wait for auth and database to be ready
 async function initializeChat() {
@@ -164,7 +166,14 @@ function createSquadCard(squad, isActive = false) {
 
 // Select a squad and update the chat window
 async function selectSquad(squadId) {
+    // Unsubscribe from previous squad's messages
+    if (messageSubscription) {
+        messageSubscription.unsubscribe();
+        messageSubscription = null;
+    }
+    
     currentSquadId = squadId;
+    chatRoomId = null;
     
     // Update active state of squad cards
     const squadCards = document.querySelectorAll('.chat-squad-card');
@@ -229,7 +238,7 @@ async function selectSquad(squadId) {
     loadSquadMessages(squadId);
 }
 
-// Load messages for a squad (placeholder - to be implemented with actual message system)
+// Load messages for a squad
 async function loadSquadMessages(squadId) {
     const messageList = document.getElementById('chat-message-list');
     const emptyMessages = document.getElementById('chat-empty-messages');
@@ -244,12 +253,167 @@ async function loadSquadMessages(squadId) {
         }
     });
     
-    // For now, show empty state
-    // TODO: Implement actual message loading from database
-    if (emptyMessages) {
-        emptyMessages.style.display = 'block';
-        emptyMessages.innerHTML = '<p>No messages yet. Start the conversation!</p>';
+    // Unsubscribe from previous realtime subscription
+    if (messageSubscription) {
+        messageSubscription.unsubscribe();
+        messageSubscription = null;
     }
+    
+    // Get chat room ID
+    const { data: chatRoom, error: roomError } = await window.Database.getOrCreateSquadChatRoom(squadId);
+    if (roomError || !chatRoom) {
+        console.error('Error getting chat room:', roomError);
+        if (emptyMessages) {
+            emptyMessages.style.display = 'block';
+            emptyMessages.innerHTML = '<p>Error loading chat. Please refresh the page.</p>';
+        }
+        return;
+    }
+    
+    chatRoomId = chatRoom.id;
+    
+    // Load messages from database
+    const { data: messages, error: messagesError } = await window.Database.getSquadMessages(squadId);
+    
+    if (messagesError) {
+        console.error('Error loading messages:', messagesError);
+        if (emptyMessages) {
+            emptyMessages.style.display = 'block';
+            emptyMessages.innerHTML = '<p>Error loading messages. Please refresh the page.</p>';
+        }
+        return;
+    }
+    
+    // Display messages
+    if (!messages || messages.length === 0) {
+        if (emptyMessages) {
+            emptyMessages.style.display = 'block';
+            emptyMessages.innerHTML = '<p>No messages yet. Start the conversation!</p>';
+        }
+    } else {
+        if (emptyMessages) {
+            emptyMessages.style.display = 'none';
+        }
+        
+        for (const message of messages) {
+            await renderMessage(message);
+        }
+        
+        // Scroll to bottom
+        messageList.scrollTop = messageList.scrollHeight;
+    }
+    
+    // Subscribe to new messages
+    setupRealtimeSubscription(chatRoomId);
+}
+
+// Render a single message
+async function renderMessage(message) {
+    const messageList = document.getElementById('chat-message-list');
+    if (!messageList) return;
+    
+    const userId = await window.Database.getCurrentUserId();
+    const isOutgoing = message.user_id === userId;
+    
+    const messageArticle = document.createElement('article');
+    messageArticle.className = `chat-message ${isOutgoing ? 'outgoing' : ''}`;
+    messageArticle.dataset.messageId = message.id;
+    messageArticle.dataset.author = message.user?.username || message.user?.email || 'Unknown';
+    
+    const header = document.createElement('div');
+    header.className = 'chat-message-header';
+    
+    const author = document.createElement('span');
+    const userName = message.user?.first_name 
+        ? `${message.user.first_name}${message.user.last_name ? ' ' + message.user.last_name : ''}`
+        : message.user?.username 
+        ? message.user.username
+        : message.user?.email?.split('@')[0] || 'Unknown';
+    author.textContent = isOutgoing ? 'You' : userName;
+    
+    const timestamp = document.createElement('time');
+    const messageDate = new Date(message.created_at);
+    const hours = messageDate.getHours().toString().padStart(2, '0');
+    const minutes = messageDate.getMinutes().toString().padStart(2, '0');
+    timestamp.setAttribute('datetime', messageDate.toISOString());
+    timestamp.textContent = `${hours}:${minutes}`;
+    
+    header.append(author, timestamp);
+    
+    const body = document.createElement('p');
+    body.className = 'chat-message-body';
+    body.textContent = message.body;
+    
+    messageArticle.append(header, body);
+    messageList.appendChild(messageArticle);
+}
+
+// Setup realtime subscription for new messages
+function setupRealtimeSubscription(roomId) {
+    const supabase = window.Database.getSupabaseClient();
+    if (!supabase || !roomId) return;
+    
+    messageSubscription = supabase
+        .channel(`squad-chat-${roomId}`)
+        .on(
+            'postgres_changes',
+            {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'chat_message',
+                filter: `squad_chat_id=eq.${roomId}`
+            },
+            async (payload) => {
+                // New message received
+                const newMessage = payload.new;
+                
+                // Check if message is already displayed (avoid duplicates)
+                const existingMessage = document.querySelector(`[data-message-id="${newMessage.id}"]`);
+                if (existingMessage) {
+                    return;
+                }
+                
+                // Fetch full message with user data
+                const { data: fullMessage, error } = await supabase
+                    .from('chat_message')
+                    .select(`
+                        id,
+                        user_id,
+                        body,
+                        created_at,
+                        user:user_id (
+                            id,
+                            username,
+                            email,
+                            first_name,
+                            last_name
+                        )
+                    `)
+                    .eq('id', newMessage.id)
+                    .single();
+                
+                if (error) {
+                    console.error('Error fetching full message:', error);
+                    return;
+                }
+                
+                // Hide empty state if visible
+                const emptyMessages = document.getElementById('chat-empty-messages');
+                if (emptyMessages) {
+                    emptyMessages.style.display = 'none';
+                }
+                
+                // Render the message
+                await renderMessage(fullMessage);
+                
+                // Scroll to bottom
+                const messageList = document.getElementById('chat-message-list');
+                if (messageList) {
+                    messageList.scrollTop = messageList.scrollHeight;
+                }
+            }
+        )
+        .subscribe();
 }
 
 // Handle message form submission
@@ -258,6 +422,7 @@ function setupMessageForm() {
     const messageField = document.getElementById('chat-message');
     const messageList = document.getElementById('chat-message-list');
     const emptyMessages = document.getElementById('chat-empty-messages');
+    const sendButton = document.querySelector('.chat-send-button');
     
     if (!composerForm || !messageField || !messageList) return;
     
@@ -274,46 +439,55 @@ function setupMessageForm() {
             return;
         }
         
+        // Disable form while sending
+        if (sendButton) sendButton.disabled = true;
+        messageField.disabled = true;
+        
         // Hide empty messages
         if (emptyMessages) {
             emptyMessages.style.display = 'none';
         }
         
-        // Create message element (for now, just local display)
-        // TODO: Save message to database
-        const messageArticle = document.createElement('article');
-        messageArticle.className = 'chat-message outgoing';
-        messageArticle.dataset.author = 'You';
+        // Save message to database
+        const { data: savedMessage, error: sendError } = await window.Database.sendSquadMessage(currentSquadId, message);
         
-        const header = document.createElement('div');
-        header.className = 'chat-message-header';
+        if (sendError) {
+            console.error('Error sending message:', sendError);
+            alert('Failed to send message. Please try again.');
+            // Re-enable form
+            if (sendButton) sendButton.disabled = false;
+            messageField.disabled = false;
+            return;
+        }
         
-        const author = document.createElement('span');
-        author.textContent = 'You';
+        // Message will be displayed via realtime subscription
+        // But we can also render it immediately for better UX
+        if (savedMessage) {
+            // Check if already rendered by subscription
+            const existingMessage = document.querySelector(`[data-message-id="${savedMessage.id}"]`);
+            if (!existingMessage) {
+                await renderMessage(savedMessage);
+                messageList.scrollTop = messageList.scrollHeight;
+            }
+        }
         
-        const timestamp = document.createElement('time');
-        const now = new Date();
-        const hours = now.getHours().toString().padStart(2, '0');
-        const minutes = now.getMinutes().toString().padStart(2, '0');
-        timestamp.setAttribute('datetime', now.toISOString());
-        timestamp.textContent = `${hours}:${minutes}`;
-        
-        header.append(author, timestamp);
-        
-        const body = document.createElement('p');
-        body.className = 'chat-message-body';
-        body.textContent = message;
-        
-        messageArticle.append(header, body);
-        messageList.appendChild(messageArticle);
-        messageList.scrollTop = messageList.scrollHeight;
-        
+        // Reset form
         composerForm.reset();
         messageField.focus();
         
-        console.log('Message sent (local only - database integration pending):', message);
+        // Re-enable form
+        if (sendButton) sendButton.disabled = false;
+        messageField.disabled = false;
     });
 }
+
+// Cleanup subscriptions on page unload
+window.addEventListener('beforeunload', () => {
+    if (messageSubscription) {
+        messageSubscription.unsubscribe();
+        messageSubscription = null;
+    }
+});
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
