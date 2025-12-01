@@ -592,6 +592,112 @@ async function populatePlayerDropdown(squadId) {
     }
 }
 
+// Handle add to leaderboard
+async function handleAddToLeaderboard() {
+    if (!currentLeaderboardData || !currentLeaderboardData.squad_id) {
+        alert('This leaderboard is not associated with a squad.');
+        return;
+    }
+    
+    const modal = document.getElementById('add-to-leaderboard-modal');
+    const membersList = document.getElementById('squad-members-list');
+    
+    if (!modal || !membersList) return;
+    
+    // Load squad members
+    try {
+        const { data: members, error } = await window.Database.getSquadMembers(currentLeaderboardData.squad_id);
+        
+        if (error) {
+            alert('Error loading squad members: ' + error.message);
+            return;
+        }
+        
+        if (!members || members.length === 0) {
+            membersList.innerHTML = '<p style="color: #888; padding: 1rem;">No squad members found.</p>';
+            modal.style.display = 'block';
+            return;
+        }
+        
+        // Get current leaderboard members
+        const { data: currentMembers, error: membersError } = await window.Database.getLeaderboardMembers(currentLeaderboardData.id);
+        const currentMemberIds = new Set();
+        if (!membersError && currentMembers && Array.isArray(currentMembers)) {
+            currentMembers.forEach(m => {
+                if (m && m.user_id) {
+                    currentMemberIds.add(m.user_id);
+                }
+            });
+        }
+        
+        // Display members with checkboxes
+        membersList.innerHTML = '';
+        members.forEach(member => {
+            const isAlreadyMember = currentMemberIds.has(member.userId);
+            const memberName = member.username || member.email?.split('@')[0] || 'Unknown';
+            
+            const memberDiv = document.createElement('div');
+            memberDiv.className = 'member-checkbox-item';
+            memberDiv.style.cssText = 'display: flex; align-items: center; padding: 0.75rem; margin: 0.5rem 0; background: var(--bg-soft, #2a2a2a); border-radius: 8px;';
+            
+            memberDiv.innerHTML = `
+                <input type="checkbox" id="member-${member.userId}" value="${member.userId}" ${isAlreadyMember ? 'disabled' : ''} style="margin-right: 0.75rem;">
+                <label for="member-${member.userId}" style="flex: 1; cursor: pointer;">
+                    <strong>${memberName}</strong>
+                    ${isAlreadyMember ? '<span style="color: #888; font-size: 0.85rem; margin-left: 0.5rem;">(Already a member)</span>' : ''}
+                </label>
+            `;
+            
+            membersList.appendChild(memberDiv);
+        });
+        
+        modal.style.display = 'block';
+    } catch (error) {
+        console.error('Error loading squad members:', error);
+        alert('Error loading squad members: ' + (error.message || 'Unknown error'));
+    }
+}
+
+// Close add to leaderboard modal
+function closeAddToLeaderboardModal() {
+    const modal = document.getElementById('add-to-leaderboard-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Confirm and add selected members to leaderboard
+async function confirmAddMembersToLeaderboard() {
+    if (!currentLeaderboardData) {
+        alert('Error: Leaderboard data not loaded');
+        return;
+    }
+    
+    const checkboxes = document.querySelectorAll('#squad-members-list input[type="checkbox"]:checked:not([disabled])');
+    const selectedUserIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (selectedUserIds.length === 0) {
+        alert('Please select at least one member to add.');
+        return;
+    }
+    
+    try {
+        const { error } = await window.Database.addMembersToLeaderboard(currentLeaderboardData.id, selectedUserIds);
+        
+        if (error) {
+            alert('Error adding members: ' + error.message);
+        } else {
+            alert(`Successfully added ${selectedUserIds.length} member(s) to the leaderboard.`);
+            closeAddToLeaderboardModal();
+            // Reload the leaderboard to show updated entries
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error adding members:', error);
+        alert('Error adding members: ' + (error.message || 'Unknown error'));
+    }
+}
+
 // Handle delete leaderboard
 async function handleDeleteLeaderboard() {
     if (!currentLeaderboardData) {
@@ -688,10 +794,14 @@ async function loadLeaderboard() {
             titleEl.textContent = leaderboard.name || 'Unnamed Leaderboard';
         }
         
-        // Check if current user is the admin (can delete)
+        // Check if current user is the admin (can delete and add members)
         const userId = await window.Database.getCurrentUserId();
+        const addButton = document.getElementById('add-to-leaderboard-button');
         if (deleteButton && leaderboard.admin_user_id === userId) {
             deleteButton.style.display = 'inline-flex';
+        }
+        if (addButton && leaderboard.admin_user_id === userId && leaderboard.squad_id) {
+            addButton.style.display = 'inline-flex';
         }
         
         // Show squad chat button if leaderboard has a squad

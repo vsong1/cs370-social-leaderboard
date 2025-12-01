@@ -463,6 +463,79 @@ async function updateLeaderboardEntry(leaderboardId, playerName, newScore, evide
     return addLeaderboardEntry(leaderboardId, playerName, newScore, evidenceFile);
 }
 
+// Get leaderboard members
+async function getLeaderboardMembers(leaderboardId) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const { data, error } = await supabase
+        .from('leaderboard_membership')
+        .select('user_id')
+        .eq('leaderboard_id', leaderboardId);
+    
+    return { data, error };
+}
+
+// Add members to a leaderboard
+async function addMembersToLeaderboard(leaderboardId, userIds) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const currentUserId = await getCurrentUserId();
+    if (!currentUserId) return { data: null, error: 'User not logged in' };
+    
+    // Verify user is the admin of the leaderboard
+    const { data: leaderboard, error: fetchError } = await supabase
+        .from('leaderboard')
+        .select('admin_user_id')
+        .eq('id', leaderboardId)
+        .single();
+    
+    if (fetchError) return { data: null, error: fetchError };
+    if (!leaderboard) return { data: null, error: 'Leaderboard not found' };
+    
+    if (leaderboard.admin_user_id !== currentUserId) {
+        return { data: null, error: 'Only the leaderboard admin can add members' };
+    }
+    
+    // Check which users are already members
+    const { data: existingMembers, error: existingError } = await supabase
+        .from('leaderboard_membership')
+        .select('user_id')
+        .eq('leaderboard_id', leaderboardId)
+        .in('user_id', userIds);
+    
+    if (existingError) return { data: null, error: existingError };
+    
+    const existingUserIds = new Set((existingMembers || []).map(m => m.user_id));
+    const newUserIds = userIds.filter(id => !existingUserIds.has(id));
+    
+    if (newUserIds.length === 0) {
+        return { data: { added: 0, skipped: userIds.length }, error: null };
+    }
+    
+    // Insert new memberships
+    const memberships = newUserIds.map(userId => ({
+        leaderboard_id: leaderboardId,
+        user_id: userId
+    }));
+    
+    const { data: inserted, error: insertError } = await supabase
+        .from('leaderboard_membership')
+        .insert(memberships)
+        .select();
+    
+    if (insertError) return { data: null, error: insertError };
+    
+    return { 
+        data: { 
+            added: inserted?.length || 0, 
+            skipped: userIds.length - (inserted?.length || 0) 
+        }, 
+        error: null 
+    };
+}
+
 // Remove a user from a leaderboard and delete all their scores
 async function removeUserFromLeaderboard(leaderboardId, userId) {
     const supabase = getSupabaseClient();
@@ -1138,6 +1211,8 @@ window.Database = {
     getSimpleLeaderboardEntries,
     deleteLeaderboard,
     removeUserFromLeaderboard,
+    getLeaderboardMembers,
+    addMembersToLeaderboard,
     getUserSquads,
     getSquadMemberCount,
     getSquadMembers,

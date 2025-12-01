@@ -80,6 +80,9 @@
 
 .squads-list {
     max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .squad-card {

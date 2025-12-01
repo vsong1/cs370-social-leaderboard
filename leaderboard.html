@@ -33,10 +33,16 @@
 
     <main class="leaderboard-main-content">
         <div class="leaderboard-container">
-            <button class="delete-leaderboard-button" id="delete-leaderboard-button" style="display: none;" onclick="handleDeleteLeaderboard()">
-                <span>DELETE</span>
-                <span>LEADERBOARD</span>
-            </button>
+            <div class="leaderboard-admin-buttons">
+                <button class="add-to-leaderboard-button" id="add-to-leaderboard-button" style="display: none;" onclick="handleAddToLeaderboard()">
+                    <span>ADD MEMBER</span>
+                    <span>TO LEADERBOARD</span>
+                </button>
+                <button class="delete-leaderboard-button" id="delete-leaderboard-button" style="display: none;" onclick="handleDeleteLeaderboard()">
+                    <span>DELETE</span>
+                    <span>LEADERBOARD</span>
+                </button>
+            </div>
             <div class="leaderboard-header">
                 <a href="#" class="back-link" onclick="goBackToLeaderboards()">
                     &lt; Back to Leaderboards
@@ -88,6 +94,21 @@
                         <button type="submit" class="form-submit">Submit Score</button>
                     </div>
                 </form>
+            </div>
+            
+            <!-- Add to Leaderboard Modal -->
+            <div class="modal" id="add-to-leaderboard-modal" style="display: none;">
+                <div class="modal-content">
+                    <h2>Add Members to Leaderboard</h2>
+                    <p>Select squad members to add to this leaderboard:</p>
+                    <div id="squad-members-list" class="squad-members-list">
+                        <!-- Members will be loaded here -->
+                    </div>
+                    <div class="modal-actions">
+                        <button class="form-cancel" onclick="closeAddToLeaderboardModal()">Cancel</button>
+                        <button class="form-submit" onclick="confirmAddMembersToLeaderboard()">Add Selected</button>
+                    </div>
+                </div>
             </div>
             
         </div>
