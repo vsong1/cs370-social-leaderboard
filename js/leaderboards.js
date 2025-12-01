@@ -136,16 +136,30 @@ async function loadAllLeaderboards() {
         return;
     }
     
-    // Load member counts for each leaderboard (in parallel)
-    const leaderboardsWithCounts = await Promise.all(
+    // Load member counts and squad names for each leaderboard (in parallel)
+    const leaderboardsWithData = await Promise.all(
         leaderboards.map(async (lb) => {
             const memberCount = await window.Database.getLeaderboardMemberCount(lb.id);
-            return { ...lb, memberCount };
+            let squadName = null;
+            
+            // Fetch squad name if leaderboard has a squad_id
+            if (lb.squad_id) {
+                try {
+                    const { data: squad, error: squadError } = await window.Database.getSquadById(lb.squad_id);
+                    if (!squadError && squad) {
+                        squadName = squad.name;
+                    }
+                } catch (error) {
+                    console.error('Error fetching squad name:', error);
+                }
+            }
+            
+            return { ...lb, memberCount, squadName };
         })
     );
     
     // Create cards for each leaderboard
-    leaderboardsWithCounts.forEach((leaderboard) => {
+    leaderboardsWithData.forEach((leaderboard) => {
         const card = document.createElement('div');
         card.className = 'leaderboard-card';
         
@@ -153,9 +167,16 @@ async function loadAllLeaderboards() {
             ? '1 member' 
             : `${leaderboard.memberCount} members`;
         
-        card.innerHTML = `
+        // Build the card HTML with squad name if available
+        let cardHTML = `
             <div class="leaderboard-info">
-                <h3 class="leaderboard-name">${leaderboard.name || 'Unnamed Leaderboard'}</h3>
+                <h3 class="leaderboard-name">${leaderboard.name || 'Unnamed Leaderboard'}</h3>`;
+        
+        if (leaderboard.squadName) {
+            cardHTML += `<p class="leaderboard-squad">${leaderboard.squadName}</p>`;
+        }
+        
+        cardHTML += `
                 <p class="leaderboard-game">${leaderboard.game_name || 'Game'}</p>
                 <p class="leaderboard-members">${memberText}</p>
             </div>
@@ -164,6 +185,7 @@ async function loadAllLeaderboards() {
             </div>
         `;
         
+        card.innerHTML = cardHTML;
         leaderboardsList.appendChild(card);
     });
     
@@ -570,11 +592,57 @@ async function populatePlayerDropdown(squadId) {
     }
 }
 
+// Handle delete leaderboard
+async function handleDeleteLeaderboard() {
+    if (!currentLeaderboardData) {
+        alert('Error: Leaderboard data not loaded');
+        return;
+    }
+    
+    const leaderboardName = currentLeaderboardData.name || 'this leaderboard';
+    const confirmed = confirm(`Are you sure you want to delete "${leaderboardName}"? This action cannot be undone.`);
+    
+    if (!confirmed) return;
+    
+    const leaderboardId = currentLeaderboardData.id;
+    const deleteButton = document.getElementById('delete-leaderboard-button');
+    
+    if (deleteButton) {
+        deleteButton.disabled = true;
+        deleteButton.innerHTML = '<span>DELETING...</span>';
+    }
+    
+    try {
+        const { data, error } = await window.Database.deleteLeaderboard(leaderboardId);
+        
+        if (error) {
+            alert(`Error deleting leaderboard: ${error.message || 'Unknown error'}`);
+            if (deleteButton) {
+                deleteButton.disabled = false;
+                deleteButton.innerHTML = '<span>DELETE</span><span>LEADERBOARD</span>';
+            }
+            return;
+        }
+        
+        // Success - redirect to all leaderboards page
+        alert('Leaderboard deleted successfully');
+        window.location.href = 'all-leaderboards.html';
+    } catch (error) {
+        console.error('Error deleting leaderboard:', error);
+        alert(`Error deleting leaderboard: ${error.message || 'Unknown error'}`);
+        if (deleteButton) {
+            deleteButton.disabled = false;
+            deleteButton.innerHTML = '<span>DELETE</span><span>LEADERBOARD</span>';
+        }
+    }
+}
+
 // Leaderboard view, load data from Supabase
 async function loadLeaderboard() {
     const list = document.querySelector('.leaderboard-list');
     const titleEl = document.getElementById('leaderboard-title');
     const chatButton = document.getElementById('squad-chat-button');
+    const deleteButton = document.getElementById('delete-leaderboard-button');
     
     if (!list) return;
 
@@ -620,11 +688,17 @@ async function loadLeaderboard() {
             titleEl.textContent = leaderboard.name || 'Unnamed Leaderboard';
         }
         
+        // Check if current user is the admin (can delete)
+        const userId = await window.Database.getCurrentUserId();
+        if (deleteButton && leaderboard.admin_user_id === userId) {
+            deleteButton.style.display = 'inline-flex';
+        }
+        
         // Show squad chat button if leaderboard has a squad
         if (leaderboard.squad_id && chatButton) {
-            chatButton.style.display = 'block';
+            chatButton.style.display = 'inline-flex';
             chatButton.onclick = () => {
-                window.location.href = `chat.html`;
+                window.location.href = `chat.html?squad_id=${leaderboard.squad_id}`;
             };
         }
         

@@ -79,6 +79,13 @@
     font-size: 0.9rem;
 }
 
+.leaderboard-squad {
+    color: var(--text-primary) !important;
+    font-weight: 500;
+    font-style: italic;
+    opacity: 0.8;
+}
+
 .leaderboard-game {
     color: var(--accent-green) !important;
     font-weight: 500;

@@ -87,7 +87,7 @@ async function loadMembers(squadId, currentUserId, isOwner = false) {
             const li = document.createElement('li');
             li.className = 'member-item';
             
-            const isOwner = member.role === 'owner';
+            const memberIsOwner = member.role === 'owner';
             const isYou = member.userId === currentUserId;
             
             // Display name
@@ -102,12 +102,21 @@ async function loadMembers(squadId, currentUserId, isOwner = false) {
             // Buttons - only show if current user is owner
             let buttonsHTML = '';
             if (isOwner) {
-                if (member.role === 'owner') {
-                    // Owner member: show disabled buttons
-                    buttonsHTML = `
-                        <button type="button" class="demote-owner-btn" disabled title="This member is an owner and cannot be demoted.">Demote</button>
-                        <button type="button" class="remove-member-btn" disabled title="This member is an owner and cannot be removed.">Remove</button>
-                    `;
+                if (memberIsOwner) {
+                    // Owner member: show demote button (but not if it's yourself)
+                    if (isYou) {
+                        // Can't demote yourself
+                        buttonsHTML = `
+                            <button type="button" class="demote-owner-btn" disabled title="You cannot demote yourself.">Demote</button>
+                            <button type="button" class="remove-member-btn" disabled title="You cannot remove yourself.">Remove</button>
+                        `;
+                    } else {
+                        // Can demote other owners
+                        buttonsHTML = `
+                            <button type="button" class="demote-owner-btn" data-user-id="${member.userId}">Demote</button>
+                            <button type="button" class="remove-member-btn" disabled title="Owners cannot be removed. Demote them first.">Remove</button>
+                        `;
+                    }
                 } else {
                     // Regular member: show action buttons
                     buttonsHTML = `
@@ -128,6 +137,11 @@ async function loadMembers(squadId, currentUserId, isOwner = false) {
             const promoteBtn = li.querySelector('.promote-owner-btn');
             if (promoteBtn) {
                 promoteBtn.addEventListener('click', () => promoteMember(squadId, member.userId));
+            }
+            
+            const demoteBtn = li.querySelector('.demote-owner-btn:not([disabled])');
+            if (demoteBtn) {
+                demoteBtn.addEventListener('click', () => demoteMember(squadId, member.userId));
             }
             
             const removeBtn = li.querySelector('.remove-member-btn:not([disabled])');
@@ -152,6 +166,26 @@ async function promoteMember(squadId, userId) {
     const { error } = await supabase
         .from('squad_membership')
         .update({ role: 'owner' })
+        .eq('squad_id', squadId)
+        .eq('user_id', userId);
+    
+    if (error) {
+        alert('Error: ' + error.message);
+    } else {
+        location.reload();
+    }
+}
+
+// Demote owner to member
+async function demoteMember(squadId, userId) {
+    if (!confirm('Demote this owner to regular member?')) return;
+    
+    const supabase = window.Database.getSupabaseClient();
+    if (!supabase) return;
+    
+    const { error } = await supabase
+        .from('squad_membership')
+        .update({ role: 'member' })
         .eq('squad_id', squadId)
         .eq('user_id', userId);
     

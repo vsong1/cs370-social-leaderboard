@@ -967,6 +967,7 @@ body[data-auth-state="signed-in"] .nav-links a[href="index.html"] {
     background: var(--bg-elevated);
     border: 1px solid var(--border-strong);
     border-radius: 16px;
+    position: relative;
 }
 
 .leaderboard-header {
@@ -993,6 +994,7 @@ body[data-auth-state="signed-in"] .nav-links a[href="index.html"] {
     gap: 2rem;
     flex-wrap: wrap;
 }
+
 
 .leaderboard-title {
     font-family: 'Orbitron', monospace;
@@ -1027,6 +1029,40 @@ body[data-auth-state="signed-in"] .nav-links a[href="index.html"] {
 .squad-chat-button:hover {
     background-color: rgba(var(--accent-pink-rgb), 0.1);
     box-shadow: 0 0 30px rgba(var(--accent-pink-rgb), 0.2);
+}
+
+.delete-leaderboard-button {
+    background: transparent;
+    border: 2px solid var(--accent-red, #ff4444);
+    color: var(--accent-red, #ff4444);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.35rem 0.7rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.2;
+    min-width: 100px;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+}
+
+.delete-leaderboard-button:hover {
+    background-color: rgba(255, 68, 68, 0.1);
+    box-shadow: 0 0 20px rgba(255, 68, 68, 0.2);
+}
+
+.delete-leaderboard-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .leaderboard-list {

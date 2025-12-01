@@ -463,6 +463,40 @@ async function updateLeaderboardEntry(leaderboardId, playerName, newScore, evide
     return addLeaderboardEntry(leaderboardId, playerName, newScore, evidenceFile);
 }
 
+// Delete a leaderboard
+async function deleteLeaderboard(leaderboardId) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const userId = await getCurrentUserId();
+    if (!userId) return { data: null, error: 'User not logged in' };
+    
+    // First, verify the leaderboard exists and user has permission (must be admin)
+    const { data: leaderboard, error: fetchError } = await supabase
+        .from('leaderboard')
+        .select('admin_user_id')
+        .eq('id', leaderboardId)
+        .single();
+    
+    if (fetchError) return { data: null, error: fetchError };
+    if (!leaderboard) return { data: null, error: 'Leaderboard not found' };
+    
+    // Check if user is the admin
+    if (leaderboard.admin_user_id !== userId) {
+        return { data: null, error: 'Only the leaderboard admin can delete this leaderboard' };
+    }
+    
+    // Delete the leaderboard (cascade should handle related records)
+    const { error: deleteError } = await supabase
+        .from('leaderboard')
+        .delete()
+        .eq('id', leaderboardId);
+    
+    if (deleteError) return { data: null, error: deleteError };
+    
+    return { data: { success: true }, error: null };
+}
+
 /**
  * SIMPLIFIED LEADERBOARD FUNCTIONS
  * These are simpler functions that work more like the localStorage version
@@ -1036,6 +1070,7 @@ window.Database = {
     addLeaderboardEntry,
     updateLeaderboardEntry,
     getSimpleLeaderboardEntries,
+    deleteLeaderboard,
     getUserSquads,
     getSquadMemberCount,
     getSquadMembers,
