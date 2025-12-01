@@ -387,7 +387,10 @@ const handleJoinSubmit = async (event) => {
         const { data, error } = await window.Database.joinSquadByInviteCode(inviteInput);
 
         if (error) {
-            showJoinError(error.message || 'Failed to join squad. Please check the invite code and try again.');
+            const errorMessage = typeof error === 'string'
+                ? error
+                : error?.message || 'Failed to join squad. Please check the invite code and try again.';
+            showJoinError(errorMessage);
             if (submitButton) {
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;

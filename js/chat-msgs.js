@@ -3,6 +3,10 @@ let currentSquadId = null;
 let squads = [];
 let chatRoomId = null;
 let messageSubscription = null;
+let searchTerm = '';
+let searchDebounce = null;
+let defaultEmptyStateHTML = '';
+let isLoadingSquads = false;
 
 // Wait for auth and database to be ready
 async function initializeChat() {
@@ -34,13 +38,40 @@ async function initializeChat() {
     });
 }
 
+function setupSquadSearch() {
+    const searchInput = document.querySelector('.chat-search input');
+    if (!searchInput) return;
+
+    // Clear any persisted value so we don't start filtered to nothing
+    searchInput.value = '';
+    searchTerm = '';
+    
+    // Re-render the list to ensure it shows all squads after clearing search
+    renderSquadList();
+
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+            searchTerm = searchInput.value.trim().toLowerCase();
+            renderSquadList();
+        }, 250);
+    });
+}
+
 // Load squads from database
 async function loadSquads() {
+    if (isLoadingSquads) return;
+    isLoadingSquads = true;
+
     const squadList = document.getElementById('chat-squad-list');
     const emptyState = document.getElementById('chat-empty-state');
     const countBadge = document.getElementById('squad-count-badge');
     
     if (!squadList) return;
+    
+    if (emptyState && !defaultEmptyStateHTML) {
+        defaultEmptyStateHTML = emptyState.innerHTML;
+    }
     
     try {
         const { data, error } = await window.Database.getUserSquads();
@@ -51,62 +82,27 @@ async function loadSquads() {
                 emptyState.style.display = 'block';
                 emptyState.innerHTML = '<p>Error loading squads. Please refresh the page.</p>';
             }
+            squads = [];
+            clearActiveChatForNoResults('Error loading squads');
             return;
         }
         
-        squads = data || [];
+        const baseSquads = data || [];
         
-        // Update count badge
-        if (countBadge) {
-            countBadge.textContent = `${squads.length} ${squads.length === 1 ? 'Squad' : 'Squads'}`;
-        }
-        
-        // Clear existing squad cards (except empty state)
-        const existingCards = squadList.querySelectorAll('.chat-squad-card');
-        existingCards.forEach(card => card.remove());
-        
-        if (squads.length === 0) {
-            // Show empty state
-            if (emptyState) {
-                emptyState.style.display = 'block';
-            }
-            return;
-        }
-        
-        // Hide empty state
-        if (emptyState) {
-            emptyState.style.display = 'none';
-        }
-        
-        // Load member counts for each squad
         const squadsWithCounts = await Promise.all(
-            squads.map(async (squad) => {
+            baseSquads.map(async (squad) => {
                 const memberCount = await window.Database.getSquadMemberCount(squad.id);
                 return { ...squad, memberCount };
             })
         );
         
-        // Render squad cards
-        squadsWithCounts.forEach((squad, index) => {
-            const card = createSquadCard(squad, index === 0);
-            squadList.appendChild(card);
-        });
+        squads = squadsWithCounts;
         
-        // Select first squad by default
-        if (squadsWithCounts.length > 0) {
-            selectSquad(squadsWithCounts[0].id);
-        } else {
-            // No squads - disable chat composer
-            const messageField = document.getElementById('chat-message');
-            const sendButton = document.querySelector('.chat-send-button');
-            if (messageField) {
-                messageField.disabled = true;
-                messageField.placeholder = 'Join or create a squad to start chatting';
-            }
-            if (sendButton) {
-                sendButton.disabled = true;
-            }
+        if (countBadge) {
+            countBadge.textContent = `${squads.length} ${squads.length === 1 ? 'Squad' : 'Squads'}`;
         }
+        
+        renderSquadList();
         
     } catch (error) {
         console.error('Unexpected error loading squads:', error);
@@ -114,6 +110,10 @@ async function loadSquads() {
             emptyState.style.display = 'block';
             emptyState.innerHTML = '<p>Error loading squads. Please refresh the page.</p>';
         }
+        squads = [];
+        clearActiveChatForNoResults('Error loading squads');
+    } finally {
+        isLoadingSquads = false;
     }
 }
 
@@ -162,6 +162,118 @@ function createSquadCard(squad, isActive = false) {
     });
     
     return card;
+}
+
+function clearActiveChatForNoResults(message) {
+    if (messageSubscription) {
+        messageSubscription.unsubscribe();
+        messageSubscription = null;
+    }
+    
+    chatRoomId = null;
+    currentSquadId = null;
+    
+    const headerTitle = document.getElementById('chat-header-title');
+    const headerStatus = document.getElementById('chat-header-status');
+    const headerActions = document.getElementById('chat-header-actions');
+    if (headerTitle) {
+        headerTitle.textContent = 'Select a squad';
+    }
+    if (headerStatus) {
+        headerStatus.textContent = message || 'Choose a squad from the sidebar to start chatting';
+    }
+    if (headerActions) {
+        headerActions.style.display = 'none';
+    }
+    
+    const messageField = document.getElementById('chat-message');
+    const sendButton = document.querySelector('.chat-send-button');
+    if (messageField) {
+        messageField.disabled = true;
+        messageField.placeholder = message || 'Select a squad to start chatting';
+    }
+    if (sendButton) {
+        sendButton.disabled = true;
+    }
+    
+    const messageList = document.getElementById('chat-message-list');
+    const emptyMessages = document.getElementById('chat-empty-messages');
+    if (messageList) {
+        const existingMessages = messageList.querySelectorAll('.chat-message, .chat-day-separator');
+        existingMessages.forEach(msg => {
+            if (msg.id !== 'chat-empty-messages') {
+                msg.remove();
+            }
+        });
+    }
+    if (emptyMessages) {
+        emptyMessages.style.display = 'block';
+        emptyMessages.innerHTML = `<p>${message || 'Select a squad to view messages'}</p>`;
+    }
+}
+
+function renderSquadList() {
+    const squadList = document.getElementById('chat-squad-list');
+    const emptyState = document.getElementById('chat-empty-state');
+    const searchInput = document.querySelector('.chat-search input');
+    
+    if (!squadList) return;
+    
+    if (emptyState && !defaultEmptyStateHTML) {
+        defaultEmptyStateHTML = emptyState.innerHTML;
+    }
+    
+    // Get search term from input or use the stored searchTerm variable
+    // Only use input value if searchInput exists and has a value
+    let inputValue = '';
+    if (searchInput) {
+        inputValue = searchInput.value || '';
+    }
+    
+    const normalizedSearch = (inputValue || searchTerm || '').trim().toLowerCase();
+    
+    // Only update searchTerm if we have a valid search input element
+    // This prevents issues during initial load
+    if (searchInput) {
+        searchTerm = normalizedSearch;
+    }
+    
+    // Only filter if there's an actual search term
+    const filteredSquads = normalizedSearch
+        ? squads.filter((squad) => (squad.name || '').toLowerCase().includes(normalizedSearch))
+        : [...squads];
+    
+    const existingCards = squadList.querySelectorAll('.chat-squad-card');
+    existingCards.forEach(card => card.remove());
+    
+    if (filteredSquads.length === 0) {
+        if (emptyState) {
+            emptyState.style.display = 'block';
+            emptyState.innerHTML = squads.length === 0
+                ? (defaultEmptyStateHTML || '<p>You\'re not part of any squads yet.</p><p>Create or join a squad to get started!</p>')
+                : '<p>No squads match that name.</p><p>Try a different search.</p>';
+        }
+        const statusMessage = squads.length === 0
+            ? 'Join or create a squad to start chatting'
+            : 'No squads match your search';
+        clearActiveChatForNoResults(statusMessage);
+        return;
+    }
+    
+    if (emptyState) {
+        emptyState.style.display = 'none';
+        emptyState.innerHTML = defaultEmptyStateHTML || emptyState.innerHTML;
+    }
+    
+    filteredSquads.forEach((squad) => {
+        const card = createSquadCard(squad, squad.id === currentSquadId);
+        squadList.appendChild(card);
+    });
+    
+    const hasCurrent = filteredSquads.some(squad => squad.id === currentSquadId);
+    if (!hasCurrent) {
+        selectSquad(filteredSquads[0].id);
+    }
 }
 
 // Select a squad and update the chat window
@@ -493,4 +605,5 @@ window.addEventListener('beforeunload', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeChat();
     setupMessageForm();
+    setupSquadSearch();
 });
