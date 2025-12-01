@@ -463,6 +463,72 @@ async function updateLeaderboardEntry(leaderboardId, playerName, newScore, evide
     return addLeaderboardEntry(leaderboardId, playerName, newScore, evidenceFile);
 }
 
+// Remove a user from a leaderboard and delete all their scores
+async function removeUserFromLeaderboard(leaderboardId, userId) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    try {
+        // Get all match results for this leaderboard
+        const { data: matchResults, error: matchError } = await supabase
+            .from('match_result')
+            .select('id')
+            .eq('leaderboard_id', leaderboardId);
+        
+        if (matchError) {
+            console.error('Error fetching match results:', matchError);
+            // Continue anyway
+        } else if (matchResults && matchResults.length > 0) {
+            const matchResultIds = matchResults.map(mr => mr.id);
+            
+            // Delete all result_lines for this user in these match results
+            const { error: deleteLinesError } = await supabase
+                .from('result_line')
+                .delete()
+                .eq('user_id', userId)
+                .in('match_result_id', matchResultIds);
+            
+            if (deleteLinesError) {
+                console.error('Error deleting result lines:', deleteLinesError);
+                // Continue anyway
+            }
+            
+            // Delete match_results that have no result_lines left
+            for (const matchResultId of matchResultIds) {
+                const { data: remainingLines } = await supabase
+                    .from('result_line')
+                    .select('id')
+                    .eq('match_result_id', matchResultId)
+                    .limit(1);
+                
+                if (!remainingLines || remainingLines.length === 0) {
+                    // No result lines left, delete the match_result
+                    await supabase
+                        .from('match_result')
+                        .delete()
+                        .eq('id', matchResultId);
+                }
+            }
+        }
+        
+        // Remove user from leaderboard membership
+        const { error: removeMembershipError } = await supabase
+            .from('leaderboard_membership')
+            .delete()
+            .eq('leaderboard_id', leaderboardId)
+            .eq('user_id', userId);
+        
+        if (removeMembershipError) {
+            return { data: null, error: removeMembershipError };
+        }
+        
+        return { data: { success: true }, error: null };
+    } catch (error) {
+        console.error('Error removing user from leaderboard:', error);
+        return { data: null, error };
+    }
+}
+
 // Delete a leaderboard
 async function deleteLeaderboard(leaderboardId) {
     const supabase = getSupabaseClient();
@@ -1071,6 +1137,7 @@ window.Database = {
     updateLeaderboardEntry,
     getSimpleLeaderboardEntries,
     deleteLeaderboard,
+    removeUserFromLeaderboard,
     getUserSquads,
     getSquadMemberCount,
     getSquadMembers,

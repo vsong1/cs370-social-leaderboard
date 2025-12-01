@@ -198,21 +198,46 @@ async function demoteMember(squadId, userId) {
 
 // Remove member
 async function removeMember(squadId, userId) {
-    if (!confirm('Remove this member from the squad?')) return;
+    if (!confirm('Remove this member from the squad? They will also be removed from all leaderboards associated with this squad, and their scores will be deleted.')) return;
     
     const supabase = window.Database.getSupabaseClient();
     if (!supabase) return;
     
-    const { error } = await supabase
-        .from('squad_membership')
-        .delete()
-        .eq('squad_id', squadId)
-        .eq('user_id', userId);
-    
-    if (error) {
-        alert('Error: ' + error.message);
-    } else {
-        location.reload();
+    try {
+        // First, get all leaderboards associated with this squad
+        const { data: leaderboards, error: lbError } = await window.Database.getSquadLeaderboards(squadId);
+        
+        if (lbError) {
+            console.error('Error fetching squad leaderboards:', lbError);
+            // Continue anyway - we'll still try to remove from squad
+        } else if (leaderboards && leaderboards.length > 0) {
+            const leaderboardIds = leaderboards.map(lb => lb.id);
+            
+            // For each leaderboard, remove the user and delete their scores
+            for (const leaderboardId of leaderboardIds) {
+                const { error: removeError } = await window.Database.removeUserFromLeaderboard(leaderboardId, userId);
+                if (removeError) {
+                    console.error(`Error removing user from leaderboard ${leaderboardId}:`, removeError);
+                    // Continue with other leaderboards
+                }
+            }
+        }
+        
+        // Remove from squad membership
+        const { error } = await supabase
+            .from('squad_membership')
+            .delete()
+            .eq('squad_id', squadId)
+            .eq('user_id', userId);
+        
+        if (error) {
+            alert('Error: ' + error.message);
+        } else {
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error removing member:', error);
+        alert('Error removing member: ' + (error.message || 'Unknown error'));
     }
 }
 
