@@ -593,6 +593,116 @@ async function getSquadMembers(squadId) {
     return { data: members, error: null };
 }
 
+// Get a single squad by ID (with membership verification)
+async function getSquadById(squadId) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const userId = await getCurrentUserId();
+    if (!userId) return { data: null, error: 'User not logged in' };
+    
+    // Verify user is a member of the squad
+    const { data: userMembership, error: checkError } = await supabase
+        .from('squad_membership')
+        .select('id, role')
+        .eq('squad_id', squadId)
+        .eq('user_id', userId)
+        .single();
+    
+    if (checkError || !userMembership) {
+        return { data: null, error: 'You are not a member of this squad' };
+    }
+    
+    // Get squad details
+    const { data: squad, error: squadError } = await supabase
+        .from('squad')
+        .select('*')
+        .eq('id', squadId)
+        .single();
+    
+    if (squadError) return { data: null, error: squadError };
+    
+    return { 
+        data: { 
+            ...squad, 
+            userRole: userMembership.role 
+        }, 
+        error: null 
+    };
+}
+
+// Update squad information
+async function updateSquad(squadId, updates) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const userId = await getCurrentUserId();
+    if (!userId) return { data: null, error: 'User not logged in' };
+    
+    // Verify user is an owner of the squad
+    const { data: userMembership, error: checkError } = await supabase
+        .from('squad_membership')
+        .select('role')
+        .eq('squad_id', squadId)
+        .eq('user_id', userId)
+        .single();
+    
+    if (checkError || !userMembership) {
+        return { data: null, error: 'You are not a member of this squad' };
+    }
+    
+    if (userMembership.role !== 'owner') {
+        return { data: null, error: 'Only squad owners can update squad information' };
+    }
+    
+    // Update the squad
+    const { data: squad, error: updateError } = await supabase
+        .from('squad')
+        .update(updates)
+        .eq('id', squadId)
+        .select()
+        .single();
+    
+    if (updateError) return { data: null, error: updateError };
+    
+    return { data: squad, error: null };
+}
+
+// Delete a squad
+async function deleteSquad(squadId) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return { data: null, error: 'Supabase not initialized' };
+    
+    const userId = await getCurrentUserId();
+    if (!userId) return { data: null, error: 'User not logged in' };
+    
+    // Verify user is an owner of the squad
+    const { data: userMembership, error: checkError } = await supabase
+        .from('squad_membership')
+        .select('role')
+        .eq('squad_id', squadId)
+        .eq('user_id', userId)
+        .single();
+    
+    if (checkError || !userMembership) {
+        return { data: null, error: 'You are not a member of this squad' };
+    }
+    
+    if (userMembership.role !== 'owner') {
+        return { data: null, error: 'Only squad owners can delete squads' };
+    }
+    
+    // Delete squad (cascade should handle memberships)
+    const { error: deleteError } = await supabase
+        .from('squad')
+        .delete()
+        .eq('id', squadId);
+    
+    if (deleteError) return { data: null, error: deleteError };
+    
+    return { data: { success: true }, error: null };
+}
+
 // Create a new squad
 async function createSquad(squadData) {
     const supabase = getSupabaseClient();
@@ -774,6 +884,9 @@ window.Database = {
     getUserSquads,
     getSquadMemberCount,
     getSquadMembers,
+    getSquadById,
+    updateSquad,
+    deleteSquad,
     createSquad,
     joinSquadByInviteCode,
     getSquadLeaderboards

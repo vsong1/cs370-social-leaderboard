@@ -20,7 +20,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-greeting">
-                <span>Ready to compete, Georgia!</span>
+                <span id="user-greeting-name">Ready to compete!</span>
             </div>
 
             <!-- Hamburger button -->
@@ -51,8 +51,8 @@
             <section class="create-squad-panel" data-panel>
                 <form id="manage-squad-form" novalidate>
                     <div class="form-field">
-                        <label for="squad-name">Squad Name<span aria-hidden="true">*</span></label>
-                        <input id="squad-name" name="squad_name" required maxlength="40" placeholder="e.g., Valorant Eagles">
+                        <label for="squad-name">Squad Name</label>
+                        <div id="squad-name" class="squad-name-display"></div>
                     </div>
 
                     <div class="form-field">
@@ -72,16 +72,7 @@
                     <section class="member-management">
                         <h2>Squad Members</h2>
                         <ul id="member-list" class="member-list">
-                            <!-- Example Members -->
-                            <li class="member-item">
-                                <span class="member-name">Georgia (You)</span>
-                                <div class="member-buttons">
-                                    <button type="button" class="demote-owner-btn" disabled
-                                    title="This member is an owner and cannot be removed.">Remove</button>
-                                    <button type="button" class="remove-member-btn" disabled
-                                    title="This member is an owner and cannot be removed.">Remove</button>
-                                </div>
-                            </li>
+                            <!-- Members will be loaded dynamically here -->
                         </ul>
                         <div class="add-member">
                             <input type="text" id="new-member" placeholder="Enter email to send invite">
@@ -123,6 +114,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Auth System -->
     <script src="supabase-auth.js"></script>
+    <!-- Database Helpers -->
+    <script src="js/database.js"></script>
     <!-- Site Scripts -->
     <script src="js/script.js"></script>
     <script src="js/theme-toggle.js"></script>
