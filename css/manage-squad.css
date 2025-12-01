@@ -144,6 +144,12 @@ textarea {
     font-weight: 500;
 }
 
+.member-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
 .remove-member-btn {
     background: #ff4d4d;
     color: var(--text-primary);
