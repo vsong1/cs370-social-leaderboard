@@ -21,10 +21,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // Load and display squad data
-    await loadSquad(squadId);
+    const squad = await loadSquad(squadId);
+    if (!squad) return;
     
-    // Get squad to check if user is owner
-    const { data: squad } = await window.Database.getSquadById(squadId);
     const isOwner = squad?.userRole === 'owner';
     
     // Load and display members
@@ -42,7 +41,7 @@ async function loadSquad(squadId) {
         if (error) {
             alert('Error: ' + error.message);
             window.location.href = 'all-squads.html';
-            return;
+            return null;
         }
         
         // Display squad name
@@ -55,10 +54,15 @@ async function loadSquad(squadId) {
         
         const descEl = document.getElementById('squad-description');
         if (descEl) descEl.value = squad.description || '';
+
+        setupInviteCode(squad.invite_code);
+
+        return squad;
         
     } catch (error) {
         console.error('Error loading squad:', error);
         alert('Failed to load squad');
+        return null;
     }
 }
 
@@ -154,6 +158,41 @@ async function loadMembers(squadId, currentUserId, isOwner = false) {
         console.error('Error loading members:', error);
         memberList.innerHTML = '<li class="member-item"><span class="member-name">Error loading members</span></li>';
     }
+}
+
+function setupInviteCode(inviteCode) {
+    const codeEl = document.getElementById('invite-code-display');
+    const copyBtn = document.getElementById('copy-invite-btn');
+    if (!codeEl || !copyBtn) return;
+
+    const code = inviteCode || 'Unavailable';
+    codeEl.textContent = code;
+    copyBtn.disabled = !inviteCode;
+
+    const resetText = () => {
+        copyBtn.textContent = 'Copy Code';
+    };
+
+    copyBtn.onclick = async () => {
+        if (!inviteCode) return;
+        try {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(inviteCode);
+            } else {
+                const temp = document.createElement('textarea');
+                temp.value = inviteCode;
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand('copy');
+                document.body.removeChild(temp);
+            }
+            copyBtn.textContent = 'Copied!';
+        } catch (err) {
+            console.error('Failed to copy invite code:', err);
+            copyBtn.textContent = 'Copy failed';
+        }
+        setTimeout(resetText, 1200);
+    };
 }
 
 // Promote member to owner
