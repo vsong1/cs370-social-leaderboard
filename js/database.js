@@ -952,6 +952,25 @@ async function createSquad(squadData) {
         return { data: null, error: membershipError };
     }
     
+    // Create chat room for the squad (this might fail due to RLS, but we'll try)
+    // If it fails, the chat room will be created lazily when first accessed
+    try {
+        const { data: chatRoom, error: chatRoomError } = await supabase
+            .from('squad_chat_room')
+            .insert({ squad_id: squad.id })
+            .select()
+            .single();
+        
+        // If chat room creation fails due to RLS, log it but don't fail the squad creation
+        // The chat room can be created later when first accessed
+        if (chatRoomError) {
+            console.warn('⚠️ Could not create chat room automatically:', chatRoomError.message);
+            console.warn('Chat room will be created when first accessed.');
+        }
+    } catch (error) {
+        console.warn('⚠️ Error creating chat room:', error);
+    }
+    
     return { data: { ...squad, membershipRole: 'owner' }, error: null };
 }
 
@@ -1086,6 +1105,16 @@ async function getOrCreateSquadChatRoom(squadId) {
             .single();
         
         if (createError) {
+            // If RLS policy blocks the insert, provide helpful error message
+            if (createError.message && createError.message.includes('row-level security')) {
+                return { 
+                    data: null, 
+                    error: {
+                        ...createError,
+                        message: 'Cannot create chat room: Row-level security policy violation. Please run the migration-fix-squad-chat-room-rls.sql file in your Supabase SQL editor to fix this issue.'
+                    }
+                };
+            }
             return { data: null, error: createError };
         }
         
