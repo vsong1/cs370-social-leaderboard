@@ -56,5 +56,13 @@ async function build() {
   console.log('Build completed: files copied to public/ directory');
 }
 
-build().catch(console.error);
+build()
+  .then(() => {
+    console.log('✅ Build successful');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('❌ Build failed:', error);
+    process.exit(1);
+  });
 
