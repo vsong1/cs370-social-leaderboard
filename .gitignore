@@ -25,5 +25,6 @@ npm-debug.log*
 # Build outputs
 dist/
 build/
+public/
 
 
